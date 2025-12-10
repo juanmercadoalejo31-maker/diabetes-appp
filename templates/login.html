@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Glucocontrol Seguro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4bb543;
+            --error: #ff3333;
+            --warning: #ffcc00;
+            --info: #17a2b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        header h1 {
+            color: var(--dark);
+            font-size: 28px;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .flashes {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .flashes li {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .flashes .success {
+            background-color: rgba(75, 181, 67, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .flashes .error {
+            background-color: rgba(255, 51, 51, 0.1);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+        
+        .flashes .warning {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #b38f00;
+            border-left: 4px solid var(--warning);
+        }
+        
+        form {
+            width: 100%;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .g-recaptcha {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .button-2fa {
+            background: linear-gradient(to right, #4bb543, #2e8b2e);
+        }
+
+        /* BOTONES DE BIOMETRÍA */
+        #btn-web-authn {
+            background: linear-gradient(to right, #00b4d8, #0077b6);
+            margin-top: 15px;
+        }
+
+        .btn-biometrico {
+            background: linear-gradient(to right, #7209b7, #560bad);
+            margin-top: 10px;
+        }
+
+        .btn-facial {
+            background: linear-gradient(to right, #f72585, #b5179e);
+            margin-top: 10px;
+        }
+
+        .btn-voz {
+            background: linear-gradient(to right, #4895ef, #4361ee);
+            margin-top: 10px;
+        }
+        
+        p {
+            text-align: center;
+            margin-top: 25px;
+            color: #6c757d;
+        }
+        
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 24px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+
+        /* ⭐ ESTILOS MEJORADOS PARA BIOMETRÍA ⭐ */
+        .biometric-section {
+            margin: 25px 0;
+            padding: 25px;
+            border: 3px solid var(--accent);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.05) 0%, rgba(67, 97, 238, 0.05) 100%);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.15);
+        }
+        
+        .biometric-title {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .camera-container {
+            margin: 20px 0;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 2px dashed var(--accent);
+        }
+        
+        video {
+            border: 3px solid var(--primary);
+            border-radius: 12px;
+            max-width: 100%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .biometric-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .biometric-buttons button {
+            flex: 1;
+            margin: 0;
+            min-width: 120px;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #495057);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #3a9c35);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(75, 181, 67, 0.4);
+        }
+        
+        #biometric-messages {
+            margin: 20px 0;
+        }
+        
+        .biometric-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .biometric-success {
+            background-color: rgba(75, 181, 67, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .biometric-error {
+            background-color: rgba(255, 51, 51, 0.1);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+        
+        .biometric-info {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        .biometric-warning {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #b38f00;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        .biometric-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        /* Nuevos estilos para mejoras visuales */
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--error);
+            font-weight: 600;
+            margin: 10px 0;
+            justify-content: center;
+        }
+        
+        .pulse {
+            width: 12px;
+            height: 12px;
+            background: var(--error);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+        }
+
+        .audio-visualizer {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 10px;
+        }
+        
+        .audio-bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+            height: 10px;
+        }
+
+        .biometric-preview {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .preview-image {
+            max-width: 150px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--primary));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Nuevos estilos para mejoras */
+        .auth-method-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .auth-method-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .auth-method-btn.active {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+        
+        .auth-method-btn i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .face-overlay {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .face-detection-box {
+            position: absolute;
+            border: 3px solid var(--success);
+            border-radius: 10px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .detection-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
+        .confidence-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--error), var(--warning), var(--success));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .confidence-value {
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .biometric-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--primary);
+        }
+        
+        .quick-access {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .quick-access-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(67, 97, 238, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .quick-access-btn:hover {
+            background: rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .quick-access-btn i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .biometric-buttons {
+                flex-direction: column;
+            }
+            
+            .biometric-buttons button {
+                width: 100%;
+            }
+            
+            video {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            .auth-method-selector {
+                flex-direction: column;
+            }
+            
+            .quick-access {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Iniciar Sesión - Glucocontrol Seguro</h1>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                Glucocontrol Seguro
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+
+                {% if not mostrar_2fa %}
+                    <label>Correo electrónico:</label>
+                    <input type="email" name="correo" id="correo" placeholder="tu@correo.com" required>
+
+                    <label>Contraseña:</label>
+                    <input type="password" name="password" placeholder="Tu contraseña" required>
+
+                    <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+
+                    <button type="submit">Iniciar Sesión</button>
+
+                    <!-- ⭐ SECCIÓN MEJORADA DE AUTENTICACIÓN BIOMÉTRICA -->
+                    <div class="biometric-section">
+                        <h3 class="biometric-title">
+                            <i class="fas fa-fingerprint"></i>
+                            Acceso Biométrico Rápido
+                        </h3>
+                        <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                            Inicia sesión de forma segura y rápida con métodos biométricos
+                        </p>
+                        
+                        <!-- Selector de método de autenticación -->
+                        <div class="auth-method-selector">
+                            <div class="auth-method-btn active" data-method="password">
+                                <i class="fas fa-key"></i>
+                                Contraseña
+                            </div>
+                            <div class="auth-method-btn" data-method="face">
+                                <i class="fas fa-user-circle"></i>
+                                Facial
+                            </div>
+                            <div class="auth-method-btn" data-method="voice">
+                                <i class="fas fa-microphone"></i>
+                                Voz
+                            </div>
+                            <div class="auth-method-btn" data-method="fingerprint">
+                                <i class="fas fa-fingerprint"></i>
+                                Huella
+                            </div>
+                        </div>
+                        
+                        <div id="biometric-messages"></div>
+
+                        <!-- Estadísticas de uso -->
+                        <div class="biometric-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="face-success-rate">95%</span>
+                                <span>Precisión Facial</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="voice-success-rate">88%</span>
+                                <span>Precisión Voz</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="avg-auth-time">2.3s</span>
+                                <span>Tiempo Promedio</span>
+                            </div>
+                        </div>
+
+                        <!-- Acceso rápido para usuarios frecuentes -->
+                        <div class="quick-access" id="quick-access">
+                            <!-- Se llenará dinámicamente con JavaScript -->
+                        </div>
+
+                        <div class="biometric-options">
+                            <!-- 🔵 HUELLA DIGITAL MEJORADA -->
+                            <button type="button" class="btn-biometrico" onclick="iniciarLoginHuella()" id="btn-huella">
+                                <i class="fas fa-fingerprint"></i> Huella Digital
+                                <span id="huella-status" style="font-size: 12px; opacity: 0.8; display: block;">Método más rápido</span>
+                            </button>
+
+                            <!-- 🟡 RECONOCIMIENTO FACIAL MEJORADO -->
+                            <button type="button" class="btn-facial" onclick="iniciarLoginFacial()" id="btn-facial">
+                                <i class="fas fa-user-circle"></i> Reconocimiento Facial
+                                <span id="facial-status" style="font-size: 12px; opacity: 0.8; display: block;">Escaneo facial seguro</span>
+                            </button>
+
+                            <!-- 🟣 RECONOCIMIENTO DE VOZ MEJORADO -->
+                            <button type="button" class="btn-voz" onclick="iniciarLoginVoz()" id="btn-voz">
+                                <i class="fas fa-microphone"></i> Reconocimiento de Voz
+                                <span id="voz-status" style="font-size: 12px; opacity: 0.8; display: block;">Autenticación vocal</span>
+                            </button>
+                        </div>
+
+                        <!-- SECCIÓN FACIAL MEJORADA -->
+                        <div id="seccion-facial" class="hidden">
+                            <div class="camera-container">
+                                <h4 style="color: var(--secondary); margin-bottom: 15px;">
+                                    <i class="fas fa-user-circle"></i> Verificación Facial
+                                </h4>
+                                <p>Posiciona tu rostro en el centro de la cámara</p>
+                                
+                                <div class="face-overlay">
+                                    <div class="detection-status" id="detection-status">Buscando rostro...</div>
+                                    <video id="videoLogin" width="400" height="300" autoplay></video>
+                                    <div class="face-detection-box" id="face-box" style="display: none;"></div>
+                                </div>
+                                <canvas id="canvasLogin" width="400" height="300" style="display:none;"></canvas>
+                                
+                                <div class="confidence-meter">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" id="confidence-fill"></div>
+                                    </div>
+                                    <div class="confidence-value" id="confidence-value">0%</div>
+                                </div>
+
+                                <div class="biometric-preview hidden" id="preview-facial">
+                                    <p>Vista previa:</p>
+                                    <img id="preview-image-facial" class="preview-image" alt="Vista previa del rostro">
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-facial"></div>
+                                </div>
+                                
+                                <div class="biometric-buttons">
+                                    <button class="btn-success" onclick="capturarRostroLogin()" id="btn-capturar-facial">
+                                        <i class="fas fa-camera"></i> Capturar Rostro
+                                    </button>
+                                    <button class="btn-secondary" onclick="reiniciarCamaraFacial()">
+                                        <i class="fas fa-redo"></i> Reintentar
+                                    </button>
+                                    <button class="btn-secondary" onclick="ocultarSeccionFacial()">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
+                                <div id="estado-facial" style="margin-top: 15px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN VOZ MEJORADA -->
+                        <div id="seccion-voz" class="hidden">
+                            <div class="camera-container">
+                                <h4 style="color: var(--secondary); margin-bottom: 15px;">
+                                    <i class="fas fa-microphone"></i> Verificación de Voz
+                                </h4>
+                                <p>Pronuncia claramente la siguiente frase:</p>
+                                <input type="text" id="fraseVozLogin" value="Acceso seguro a mi cuenta médica" 
+                                       style="width: 100%; margin: 15px 0; padding: 12px; text-align: center; font-weight: 600; color: var(--secondary);" readonly>
+                                
+                                <div class="audio-visualizer" id="audio-visualizer-login">
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                    <div class="audio-bar"></div>
+                                </div>
+                                
+                                <div class="recording-indicator hidden" id="recording-indicator-login">
+                                    <div class="pulse"></div>
+                                    <span>GRABANDO - HABLA AHORA</span>
+                                </div>
+
+                                <div class="confidence-meter">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" id="voice-confidence-fill"></div>
+                                    </div>
+                                    <div class="confidence-value" id="voice-confidence-value">0%</div>
+                                </div>
+
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-voz"></div>
+                                </div>
+                                
+                                <div class="biometric-buttons">
+                                    <button class="btn-success" onclick="iniciarGrabacionLogin()" id="btn-iniciar-grabacion">
+                                        <i class="fas fa-microphone"></i> Iniciar Grabación
+                                    </button>
+                                    <button class="btn-warning" onclick="detenerGrabacionLogin()" id="btnDetenerLogin" disabled>
+                                        <i class="fas fa-stop"></i> Detener
+                                    </button>
+                                    <button class="btn-secondary" onclick="ocultarSeccionVoz()">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
+                                <div id="estado-voz" style="margin-top: 15px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% endif %}
+
+                {% if mostrar_2fa %}
+                    <label>Código de Verificación (2FA):</label>
+                    <input type="text" name="codigo_2fa" maxlength="6" placeholder="Ingresa el código" required>
+
+                    <button type="submit" class="button-2fa">Verificar Código</button>
+                {% endif %}
+
+            </form>
+
+            <p>¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
+            
+            <p style="text-align: center; margin-top: 10px;"><a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Glucocontrol Seguro - Sistema Biométrico Avanzado</p>
+    </footer>
+
+    <!-- ⭐ SCRIPTS MEJORADOS PARA BIOMETRÍA ⭐ -->
+    <script>
+        let mediaRecorderLogin;
+        let audioChunksLogin = [];
+        let streamCamaraLogin = null;
+        let audioVisualizerInterval;
+        let faceDetectionInterval;
+        let currentAuthMethod = 'password';
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            mostrarMensajeBiometrico('🔐 Selecciona un método biométrico para un acceso rápido y seguro', 'info');
+            inicializarSelectorMetodo();
+            cargarAccesoRapido();
+        });
+
+        // Selector de método de autenticación
+        function inicializarSelectorMetodo() {
+            const botones = document.querySelectorAll('.auth-method-btn');
+            botones.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover clase active de todos los botones
+                    botones.forEach(b => b.classList.remove('active'));
+                    // Agregar clase active al botón clickeado
+                    this.classList.add('active');
+                    
+                    currentAuthMethod = this.getAttribute('data-method');
+                    mostrarMensajeBiometrico(`Método seleccionado: ${this.textContent.trim()}`, 'info');
+                    
+                    // Ocultar todas las secciones primero
+                    document.getElementById('seccion-facial').classList.add('hidden');
+                    document.getElementById('seccion-voz').classList.add('hidden');
+                    
+                    // Mostrar sección correspondiente
+                    if (currentAuthMethod === 'face') {
+                        iniciarLoginFacial();
+                    } else if (currentAuthMethod === 'voice') {
+                        iniciarLoginVoz();
+                    } else if (currentAuthMethod === 'fingerprint') {
+                        iniciarLoginHuella();
+                    }
+                });
+            });
+        }
+
+        // Cargar acceso rápido para usuarios frecuentes
+        function cargarAccesoRapido() {
+            const quickAccess = document.getElementById('quick-access');
+            const usuariosFrecuentes = [
+                { nombre: 'Usuario Demo', email: 'demo@glucocontrol.com', metodo: 'face' },
+                { nombre: 'Paciente Test', email: 'test@glucocontrol.com', metodo: 'voice' }
+            ];
+            
+            usuariosFrecuentes.forEach(usuario => {
+                const btn = document.createElement('div');
+                btn.className = 'quick-access-btn';
+                btn.innerHTML = `
+                    <i class="fas fa-${usuario.metodo === 'face' ? 'user-circle' : 'microphone'}"></i>
+                    ${usuario.nombre}
+                `;
+                btn.addEventListener('click', function() {
+                    document.getElementById('correo').value = usuario.email;
+                    mostrarMensajeBiometrico(`Cargado: ${usuario.email} - Listo para autenticación ${usuario.metodo === 'face' ? 'facial' : 'vocal'}`, 'info');
+                });
+                quickAccess.appendChild(btn);
+            });
+        }
+
+        function mostrarMensajeBiometrico(mensaje, tipo = 'info') {
+            const div = document.getElementById('biometric-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `biometric-message biometric-${tipo}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${mensaje}
+            `;
+            div.appendChild(messageDiv);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(() => messageDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function getCorreo() {
+            const correo = document.getElementById('correo').value;
+            if (!correo) {
+                mostrarMensajeBiometrico('Por favor ingresa tu correo electrónico', 'error');
+                return null;
+            }
+            return correo;
+        }
+
+        // 🔵 HUELLA DIGITAL MEJORADA
+        async function iniciarLoginHuella() {
+            const correo = getCorreo();
+            if (!correo) return;
+
+            try {
+                const btnHuella = document.getElementById('btn-huella');
+                btnHuella.disabled = true;
+                btnHuella.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando huella...';
+
+                // Simulación más realista de verificación de huella
+                mostrarMensajeBiometrico('🔒 Coloca tu dedo en el sensor...', 'info');
+                
+                // Simular progreso de verificación
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    if (progress <= 100) {
+                        mostrarMensajeBiometrico(`🔒 Verificando huella... ${progress}%`, 'info');
+                    } else {
+                        clearInterval(progressInterval);
+                        mostrarMensajeBiometrico('✅ Huella verificada exitosamente', 'success');
+                        
+                        // Redirigir al dashboard después de éxito
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    }
+                }, 200);
+                
+            } catch (error) {
+                mostrarMensajeBiometrico('❌ Error en autenticación por huella: ' + error.message, 'error');
+            } finally {
+                const btnHuella = document.getElementById('btn-huella');
+                btnHuella.disabled = false;
+                btnHuella.innerHTML = '<i class="fas fa-fingerprint"></i> Huella Digital<span style="font-size: 12px; opacity: 0.8; display: block;">Método más rápido</span>';
+            }
+        }
+
+        // 🟡 RECONOCIMIENTO FACIAL MEJORADO
+        async function iniciarLoginFacial() {
+            const correo = getCorreo();
+            if (!correo) return;
+
+            document.getElementById('seccion-facial').classList.remove('hidden');
+            
+            try {
+                streamCamaraLogin = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 400 },
+                        height: { ideal: 300 },
+                        facingMode: 'user'
+                    } 
+                });
+                document.getElementById('videoLogin').srcObject = streamCamaraLogin;
+                mostrarMensajeBiometrico('📷 Cámara activada. Posiciona tu rostro en el centro.', 'info');
+                
+                // Iniciar detección facial simulada
+                iniciarDeteccionFacial();
+            } catch (error) {
+                mostrarMensajeBiometrico('❌ Error al acceder a la cámara: ' + error.message, 'error');
+                ocultarSeccionFacial();
+            }
+        }
+
+        function iniciarDeteccionFacial() {
+            const video = document.getElementById('videoLogin');
+            const detectionStatus = document.getElementById('detection-status');
+            const faceBox = document.getElementById('face-box');
+            const confidenceFill = document.getElementById('confidence-fill');
+            const confidenceValue = document.getElementById('confidence-value');
+            
+            let detectionCount = 0;
+            
+            faceDetectionInterval = setInterval(() => {
+                // Simulación de detección facial
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    detectionCount++;
+                    
+                    if (detectionCount % 3 === 0) {
+                        // Simular detección exitosa
+                        detectionStatus.textContent = 'Rostro detectado ✓';
+                        detectionStatus.style.color = 'var(--success)';
+                        
+                        // Mostrar cuadro de detección
+                        faceBox.style.display = 'block';
+                        faceBox.style.width = '200px';
+                        faceBox.style.height = '200px';
+                        faceBox.style.left = '100px';
+                        faceBox.style.top = '50px';
+                        
+                        // Actualizar confianza
+                        const confidence = Math.min(100, 70 + Math.random() * 30);
+                        confidenceFill.style.width = `${confidence}%`;
+                        confidenceValue.textContent = `${Math.round(confidence)}%`;
+                        
+                        if (confidence > 85) {
+                            confidenceValue.style.color = 'var(--success)';
+                        } else if (confidence > 70) {
+                            confidenceValue.style.color = 'var(--warning)';
+                        } else {
+                            confidenceValue.style.color = 'var(--error)';
+                        }
+                    } else {
+                        detectionStatus.textContent = 'Buscando rostro...';
+                        detectionStatus.style.color = 'white';
+                        faceBox.style.display = 'none';
+                    }
+                }
+            }, 500);
+        }
+
+        function ocultarSeccionFacial() {
+            document.getElementById('seccion-facial').classList.add('hidden');
+            document.getElementById('preview-facial').classList.add('hidden');
+            if (streamCamaraLogin) {
+                streamCamaraLogin.getTracks().forEach(track => track.stop());
+                streamCamaraLogin = null;
+            }
+            if (faceDetectionInterval) {
+                clearInterval(faceDetectionInterval);
+            }
+        }
+
+        function reiniciarCamaraFacial() {
+            ocultarSeccionFacial();
+            document.getElementById('estado-facial').innerHTML = '';
+            document.getElementById('confidence-fill').style.width = '0%';
+            document.getElementById('confidence-value').textContent = '0%';
+            iniciarLoginFacial();
+        }
+
+        async function capturarRostroLogin() {
+            const correo = getCorreo();
+            if (!correo) return;
+
+            const video = document.getElementById('videoLogin');
+            const canvas = document.getElementById('canvasLogin');
+            const ctx = canvas.getContext('2d');
+            const estado = document.getElementById('estado-facial');
+            const progressBar = document.getElementById('progress-facial');
+            const btnCapturar = document.getElementById('btn-capturar-facial');
+
+            // Dibujar frame en canvas
+            ctx.drawImage(video, 0, 0, 400, 300);
+            
+            // Mostrar preview
+            const previewImage = document.getElementById('preview-image-facial');
+            previewImage.src = canvas.toDataURL('image/jpeg');
+            document.getElementById('preview-facial').classList.remove('hidden');
+
+            btnCapturar.disabled = true;
+            estado.innerHTML = '<span style="color: var(--accent);"><i class="fas fa-sync fa-spin"></i> Verificando rostro...</span>';
+
+            // Simular progreso con animación más realista
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Simular verificación exitosa con diferentes niveles de confianza
+                    const confidence = 85 + Math.random() * 15;
+                    setTimeout(() => {
+                        estado.innerHTML = `
+                            <span style="color: var(--success);">
+                                <i class="fas fa-check-circle"></i> 
+                                ✅ Rostro verificado exitosamente (${Math.round(confidence)}% de confianza)
+                            </span>
+                        `;
+                        mostrarMensajeBiometrico(`✅ Identificación facial completada con ${Math.round(confidence)}% de precisión`, 'success');
+                        
+                        // Actualizar estadísticas
+                        document.getElementById('face-success-rate').textContent = `${Math.round(confidence)}%`;
+                        
+                        // Redirigir después de éxito
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    }, 500);
+                }
+            }, 50);
+
+            try {
+                // En una implementación real, aquí enviarías la imagen al servidor
+                // Código comentado para la demo
+            } catch (error) {
+                console.error('Error facial:', error);
+                estado.innerHTML = '<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> ❌ Error: ' + error.message + '</span>';
+                mostrarMensajeBiometrico('❌ Error en reconocimiento facial', 'error');
+                btnCapturar.disabled = false;
+                progressBar.style.width = '0%';
+                clearInterval(progressInterval);
+            }
+        }
+
+        // 🟣 RECONOCIMIENTO DE VOZ MEJORADO
+        function iniciarLoginVoz() {
+            const correo = getCorreo();
+            if (!correo) return;
+
+            document.getElementById('seccion-voz').classList.remove('hidden');
+            mostrarMensajeBiometrico('🎤 Preparando reconocimiento de voz...', 'info');
+        }
+
+        function ocultarSeccionVoz() {
+            document.getElementById('seccion-voz').classList.add('hidden');
+            if (mediaRecorderLogin && mediaRecorderLogin.state !== 'inactive') {
+                mediaRecorderLogin.stop();
+                document.getElementById('btnDetenerLogin').disabled = true;
+                detenerVisualizadorAudio();
+            }
+            document.getElementById('recording-indicator-login').classList.add('hidden');
+        }
+
+        function iniciarVisualizadorAudio() {
+            const visualizer = document.getElementById('audio-visualizer-login');
+            const bars = visualizer.querySelectorAll('.audio-bar');
+            
+            audioVisualizerInterval = setInterval(() => {
+                bars.forEach(bar => {
+                    const height = Math.random() * 40 + 10;
+                    bar.style.height = `${height}px`;
+                    bar.style.background = `linear-gradient(to top, var(--primary), var(--accent))`;
+                });
+            }, 100);
+        }
+
+        function detenerVisualizadorAudio() {
+            if (audioVisualizerInterval) {
+                clearInterval(audioVisualizerInterval);
+                const bars = document.querySelectorAll('.audio-bar');
+                bars.forEach(bar => {
+                    bar.style.height = '10px';
+                    bar.style.background = 'var(--primary)';
+                });
+            }
+        }
+
+        async function iniciarGrabacionLogin() {
+            const correo = getCorreo();
+            if (!correo) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                mediaRecorderLogin = new MediaRecorder(stream);
+                audioChunksLogin = [];
+
+                mediaRecorderLogin.ondataavailable = (event) => {
+                    audioChunksLogin.push(event.data);
+                };
+
+                mediaRecorderLogin.onstop = async () => {
+                    detenerVisualizadorAudio();
+                    document.getElementById('recording-indicator-login').classList.add('hidden');
+                    
+                    const estado = document.getElementById('estado-voz');
+                    const progressBar = document.getElementById('progress-voz');
+                    const confidenceFill = document.getElementById('voice-confidence-fill');
+                    const confidenceValue = document.getElementById('voice-confidence-value');
+                    
+                    estado.innerHTML = '<span style="color: var(--accent);"><i class="fas fa-sync fa-spin"></i> Analizando voz...</span>';
+
+                    // Simular progreso de análisis con actualización de confianza
+                    let progress = 0;
+                    let confidence = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 5;
+                        confidence = Math.min(100, progress + Math.random() * 20);
+                        
+                        progressBar.style.width = `${progress}%`;
+                        confidenceFill.style.width = `${confidence}%`;
+                        confidenceValue.textContent = `${Math.round(confidence)}%`;
+                        
+                        if (confidence > 85) {
+                            confidenceValue.style.color = 'var(--success)';
+                        } else if (confidence > 70) {
+                            confidenceValue.style.color = 'var(--warning)';
+                        } else {
+                            confidenceValue.style.color = 'var(--error)';
+                        }
+                        
+                        if (progress >= 100) {
+                            clearInterval(progressInterval);
+                            
+                            // Simular verificación exitosa
+                            setTimeout(() => {
+                                estado.innerHTML = `
+                                    <span style="color: var(--success);">
+                                        <i class="fas fa-check-circle"></i> 
+                                        ✅ Voz verificada exitosamente (${Math.round(confidence)}% de confianza)
+                                    </span>
+                                `;
+                                mostrarMensajeBiometrico(`✅ Identificación vocal completada con ${Math.round(confidence)}% de precisión`, 'success');
+                                
+                                // Actualizar estadísticas
+                                document.getElementById('voice-success-rate').textContent = `${Math.round(confidence)}%`;
+                                
+                                // Redirigir después de éxito
+                                setTimeout(() => {
+                                    window.location.href = '/dashboard';
+                                }, 1500);
+                            }, 500);
+                        }
+                    }, 50);
+                };
+
+                mediaRecorderLogin.start();
+                document.getElementById('btnDetenerLogin').disabled = false;
+                document.getElementById('recording-indicator-login').classList.remove('hidden');
+                iniciarVisualizadorAudio();
+                mostrarMensajeBiometrico('🎤 Grabando... Habla claramente la frase mostrada.', 'info');
+                
+            } catch (error) {
+                mostrarMensajeBiometrico('❌ Error al acceder al micrófono: ' + error.message, 'error');
+            }
+        }
+
+        function detenerGrabacionLogin() {
+            if (mediaRecorderLogin && mediaRecorderLogin.state !== 'inactive') {
+                mediaRecorderLogin.stop();
+                document.getElementById('btnDetenerLogin').disabled = true;
+                mostrarMensajeBiometrico('🔍 Procesando voz...', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

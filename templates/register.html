@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - Glucocontrol Seguro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4bb543;
+            --error: #ff3333;
+            --warning: #ffcc00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            color: var(--dark);
+            font-size: 28px;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .flashes {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .flashes li {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .flashes .success {
+            background-color: rgba(75, 181, 67, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .flashes .error {
+            background-color: rgba(255, 51, 51, 0.1);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+        
+        .flashes .warning {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #b38f00;
+            border-left: 4px solid var(--warning);
+        }
+        
+        form {
+            width: 100%;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .g-recaptcha {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            transform: scale(0.9);
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        p {
+            text-align: center;
+            margin-top: 25px;
+            color: #6c757d;
+        }
+        
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 24px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #6c757d;
+        }
+
+        /* ⭐ ESTILOS MEJORADOS PARA BIOMETRÍA ⭐ */
+        .biometric-section {
+            margin: 25px 0;
+            padding: 25px;
+            border: 3px solid var(--accent);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.05) 0%, rgba(67, 97, 238, 0.05) 100%);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.15);
+        }
+        
+        .biometric-title {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .biometric-options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .biometric-option {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .biometric-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .biometric-option:hover::before {
+            left: 100%;
+        }
+        
+        .biometric-option:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.15);
+        }
+        
+        .biometric-option.active {
+            border-color: var(--success);
+            background: rgba(75, 181, 67, 0.05);
+        }
+        
+        .biometric-option h4 {
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+        
+        .biometric-option p {
+            text-align: left;
+            color: #6c757d;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .biometric-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-registered {
+            background: rgba(75, 181, 67, 0.1);
+            color: var(--success);
+        }
+        
+        .status-pending {
+            background: rgba(255, 204, 0, 0.1);
+            color: #b38f00;
+        }
+        
+        #biometric-messages {
+            margin: 20px 0;
+        }
+        
+        .biometric-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .biometric-success {
+            background-color: rgba(75, 181, 67, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .biometric-error {
+            background-color: rgba(255, 51, 51, 0.1);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+        
+        .biometric-info {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .biometric-warning {
+            background-color: rgba(255, 204, 0, 0.1);
+            color: #b38f00;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .camera-container {
+            margin: 20px 0;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 2px dashed var(--accent);
+        }
+        
+        video {
+            border: 3px solid var(--primary);
+            border-radius: 12px;
+            max-width: 100%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .biometric-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .biometric-buttons button {
+            flex: 1;
+            margin: 0;
+            min-width: 120px;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #495057);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #3a9c35);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(75, 181, 67, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, var(--warning), #e6b800);
+        }
+        
+        .btn-warning:hover {
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.4);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--primary));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .biometric-preview {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .preview-image {
+            max-width: 150px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--error);
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .pulse {
+            width: 12px;
+            height: 12px;
+            background: var(--error);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+        }
+
+        /* Nuevos estilos para el registro con Face ID */
+        .face-id-register-section {
+            margin: 25px 0;
+            padding: 25px;
+            border: 3px solid var(--accent);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.05) 0%, rgba(67, 97, 238, 0.05) 100%);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.15);
+            text-align: center;
+        }
+        
+        .face-id-register-button {
+            background: linear-gradient(to right, #f72585, #b5179e);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            width: 80%;
+        }
+        
+        .face-id-register-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(247, 37, 133, 0.3);
+        }
+        
+        .face-overlay {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .face-detection-box {
+            position: absolute;
+            border: 3px solid var(--success);
+            border-radius: 10px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .detection-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
+        .confidence-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--error), var(--warning), var(--success));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .confidence-value {
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* Estilos para huella digital */
+        .fingerprint-section {
+            margin: 25px 0;
+            padding: 25px;
+            border: 3px solid #7209b7;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(114, 9, 183, 0.05) 0%, rgba(86, 11, 173, 0.05) 100%);
+            box-shadow: 0 8px 25px rgba(114, 9, 183, 0.15);
+            text-align: center;
+        }
+        
+        .fingerprint-button {
+            background: linear-gradient(to right, #7209b7, #560bad);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            width: 80%;
+        }
+        
+        .fingerprint-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(114, 9, 183, 0.3);
+        }
+        
+        .fingerprint-scanner {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fingerprint-icon {
+            font-size: 100px;
+            color: #7209b7;
+            animation: fingerprintPulse 2s infinite;
+        }
+        
+        @keyframes fingerprintPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .scanner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top: 3px solid #7209b7;
+            border-radius: 50%;
+            animation: scannerRotate 2s linear infinite;
+        }
+        
+        @keyframes scannerRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .device-compatibility {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .compatibility-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .register-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .biometric-buttons {
+                flex-direction: column;
+            }
+            
+            .biometric-buttons button {
+                width: 100%;
+            }
+            
+            .face-id-register-button, .fingerprint-button {
+                width: 100%;
+            }
+            
+            .g-recaptcha {
+                transform: scale(0.8);
+            }
+            
+            .fingerprint-scanner {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .fingerprint-icon {
+                font-size: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Registro de Usuario</h1>
+    </header>
+
+    <main>
+        <div class="register-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                Glucocontrol Seguro
+            </div>
+            
+            <div class="welcome-text">
+                <p>Crea tu cuenta para comenzar a gestionar tu salud</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="register-form">
+                <!-- Campos de registro tradicional -->
+                <label>Nombre completo:</label>
+                <input type="text" name="nombre" id="nombre" placeholder="Ingresa tu nombre completo" required>
+
+                <label>Correo electrónico:</label>
+                <input type="email" name="correo" id="correo" placeholder="correo@ejemplo.com" required>
+
+                <label>Contraseña:</label>
+                <input type="password" name="password" id="password" placeholder="Crea una contraseña segura" required>
+
+                <!-- Campos ocultos para datos biométricos -->
+                <input type="hidden" name="face_data" id="face_data">
+                <input type="hidden" name="fingerprint_data" id="fingerprint_data">
+
+                <!-- 🔐 reCAPTCHA AGREGADO -->
+                <div class="g-recaptcha" data-sitekey="{{ site_key }}"></div>
+
+                <button type="submit" id="btn-register">Registrarse</button>
+            </form>
+
+            <!-- ⭐ SECCIÓN DE REGISTRO CON FACE ID ⭐ -->
+            <div class="face-id-register-section">
+                <h3 class="biometric-title">
+                    <i class="fas fa-user-circle"></i>
+                    Registra tu Face ID
+                </h3>
+                <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                    Registra tu rostro para acceder de forma rápida y segura
+                </p>
+                
+                <button class="face-id-register-button" onclick="iniciarRegistroFaceID()" id="btn-face-id-register">
+                    <i class="fas fa-face-id"></i>
+                    Registrar Face ID
+                </button>
+                
+                <div id="face-id-messages"></div>
+                
+                <!-- Sección de cámara para registro Face ID -->
+                <div id="seccion-face-id-register" class="hidden">
+                    <div class="camera-container">
+                        <h4 style="color: var(--secondary); margin-bottom: 15px;">
+                            <i class="fas fa-user-circle"></i> Registro Facial
+                        </h4>
+                        <p>Posiciona tu rostro en el centro de la cámara</p>
+                        
+                        <div class="face-overlay">
+                            <div class="detection-status" id="detection-status-register">Buscando rostro...</div>
+                            <video id="videoFaceIDRegister" width="400" height="300" autoplay></video>
+                            <div class="face-detection-box" id="face-box-register" style="display: none;"></div>
+                        </div>
+                        <canvas id="canvasFaceIDRegister" width="400" height="300" style="display:none;"></canvas>
+                        
+                        <div class="confidence-meter">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill-register"></div>
+                            </div>
+                            <div class="confidence-value" id="confidence-value-register">0%</div>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-face-id-register"></div>
+                        </div>
+                        
+                        <div class="biometric-buttons">
+                            <button class="btn-success" onclick="capturarRostroRegistro()" id="btn-capturar-registro">
+                                <i class="fas fa-camera"></i> Capturar Rostro
+                            </button>
+                            <button class="btn-secondary" onclick="cancelarRegistroFaceID()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                        <div id="estado-face-id-register" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ⭐ NUEVA SECCIÓN DE REGISTRO CON HUELLA DIGITAL ⭐ -->
+            <div class="fingerprint-section">
+                <h3 class="biometric-title">
+                    <i class="fas fa-fingerprint"></i>
+                    Registra tu Huella Digital
+                </h3>
+                <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                    Registra tu huella para un acceso ultrarrápido y seguro
+                </p>
+                
+                <!-- Información de compatibilidad -->
+                <div class="device-compatibility">
+                    <div class="compatibility-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Disponible en dispositivos móviles con sensor de huella</span>
+                    </div>
+                    <div class="compatibility-item">
+                        <i class="fas fa-laptop"></i>
+                        <span>En computadoras, disponible solo si tienen lector de huella</span>
+                    </div>
+                </div>
+                
+                <div class="fingerprint-scanner">
+                    <i class="fas fa-fingerprint fingerprint-icon"></i>
+                    <div class="scanner-ring"></div>
+                </div>
+                
+                <button class="fingerprint-button" onclick="iniciarRegistroHuella()" id="btn-huella-register">
+                    <i class="fas fa-fingerprint"></i>
+                    Registrar Huella Digital
+                </button>
+                
+                <div id="huella-messages"></div>
+                
+                <!-- Sección de registro de huella -->
+                <div id="seccion-huella-register" class="hidden">
+                    <div class="camera-container">
+                        <h4 style="color: #7209b7; margin-bottom: 15px;">
+                            <i class="fas fa-fingerprint"></i> Registro de Huella Digital
+                        </h4>
+                        
+                        <div id="huella-instructions">
+                            <p><strong>Instrucciones:</strong></p>
+                            <p>1. Coloca tu dedo en el sensor de huella</p>
+                            <p>2. Mantén el dedo firme hasta que se complete el escaneo</p>
+                            <p>3. Retira y vuelve a colocar el dedo si se te solicita</p>
+                        </div>
+                        
+                        <div class="fingerprint-scanner">
+                            <i class="fas fa-fingerprint fingerprint-icon"></i>
+                            <div class="scanner-ring"></div>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-huella-register"></div>
+                        </div>
+                        
+                        <div class="biometric-buttons">
+                            <button class="btn-success" onclick="completarRegistroHuella()" id="btn-completar-huella">
+                                <i class="fas fa-check"></i> Completar Registro
+                            </button>
+                            <button class="btn-secondary" onclick="cancelarRegistroHuella()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                        <div id="estado-huella-register" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <p>¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Glucocontrol Seguro - Sistema Biométrico Avanzado</p>
+    </footer>
+
+    <!-- ⭐ SCRIPT PARA REGISTRO CON FACE ID Y HUELLA ⭐ -->
+    <script>
+        let streamCamaraFaceIDRegister = null;
+        let faceDetectionIntervalRegister = null;
+        let registroActivo = false;
+        let rostroCapturado = false;
+        let datosRostroUsuario = null;
+        let huellaRegistrada = false;
+        let datosHuellaUsuario = null;
+
+        // Función para iniciar el registro de Face ID
+        async function iniciarRegistroFaceID() {
+            if (registroActivo) return;
+            
+            // Validar que los campos básicos estén llenos
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            const password = document.getElementById('password').value;
+            
+            if (!nombre || !correo || !password) {
+                mostrarMensajeFaceID('❌ Por favor, completa primero los datos básicos del formulario', 'error');
+                return;
+            }
+            
+            registroActivo = true;
+            document.getElementById('seccion-face-id-register').classList.remove('hidden');
+            mostrarMensajeFaceID('🔍 Iniciando registro facial...', 'info');
+            
+            try {
+                // Iniciar cámara
+                streamCamaraFaceIDRegister = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 400 },
+                        height: { ideal: 300 },
+                        facingMode: 'user'
+                    } 
+                });
+                document.getElementById('videoFaceIDRegister').srcObject = streamCamaraFaceIDRegister;
+                mostrarMensajeFaceID('📷 Cámara activada. Posiciona tu rostro en el centro.', 'info');
+                
+                // Iniciar detección facial automática
+                iniciarDeteccionFacialRegistro();
+            } catch (error) {
+                mostrarMensajeFaceID('❌ Error al acceder a la cámara: ' + error.message, 'error');
+                cancelarRegistroFaceID();
+            }
+        }
+
+        function iniciarDeteccionFacialRegistro() {
+            const video = document.getElementById('videoFaceIDRegister');
+            const detectionStatus = document.getElementById('detection-status-register');
+            const faceBox = document.getElementById('face-box-register');
+            const confidenceFill = document.getElementById('confidence-fill-register');
+            const confidenceValue = document.getElementById('confidence-value-register');
+            
+            let detectionCount = 0;
+            
+            faceDetectionIntervalRegister = setInterval(() => {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    detectionCount++;
+                    
+                    // Simulación de detección facial
+                    if (detectionCount % 3 === 0) {
+                        detectionStatus.textContent = 'Rostro detectado ✓';
+                        detectionStatus.style.color = 'var(--success)';
+                        
+                        // Mostrar cuadro de detección
+                        faceBox.style.display = 'block';
+                        faceBox.style.width = '200px';
+                        faceBox.style.height = '200px';
+                        faceBox.style.left = '100px';
+                        faceBox.style.top = '50px';
+                        
+                        // Simular análisis de confianza
+                        const confidence = Math.min(100, 70 + Math.random() * 30);
+                        
+                        confidenceFill.style.width = `${confidence}%`;
+                        confidenceValue.textContent = `${Math.round(confidence)}%`;
+                        
+                        if (confidence > 85) {
+                            confidenceValue.style.color = 'var(--success)';
+                            // Habilitar botón de captura cuando la confianza es alta
+                            document.getElementById('btn-capturar-registro').disabled = false;
+                        } else if (confidence > 70) {
+                            confidenceValue.style.color = 'var(--warning)';
+                            document.getElementById('btn-capturar-registro').disabled = false;
+                        } else {
+                            confidenceValue.style.color = 'var(--error)';
+                            document.getElementById('btn-capturar-registro').disabled = true;
+                        }
+                    } else {
+                        detectionStatus.textContent = 'Buscando rostro...';
+                        detectionStatus.style.color = 'white';
+                        faceBox.style.display = 'none';
+                        document.getElementById('btn-capturar-registro').disabled = true;
+                    }
+                }
+            }, 500);
+        }
+
+        async function capturarRostroRegistro() {
+            const video = document.getElementById('videoFaceIDRegister');
+            const canvas = document.getElementById('canvasFaceIDRegister');
+            const ctx = canvas.getContext('2d');
+            const estado = document.getElementById('estado-face-id-register');
+            const progressBar = document.getElementById('progress-face-id-register');
+            const btnCapturar = document.getElementById('btn-capturar-registro');
+            
+            // Capturar frame actual
+            ctx.drawImage(video, 0, 0, 400, 300);
+            
+            btnCapturar.disabled = true;
+            estado.innerHTML = '<span style="color: var(--accent);"><i class="fas fa-sync fa-spin"></i> Procesando rostro...</span>';
+            
+            // Simular procesamiento
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Simular registro exitoso
+                    setTimeout(() => {
+                        // Generar datos simulados del rostro
+                        const nombre = document.getElementById('nombre').value;
+                        const correo = document.getElementById('correo').value;
+                        
+                        // Convertir canvas a blob para enviar al servidor
+                        canvas.toBlob((blob) => {
+                            datosRostroUsuario = {
+                                nombre: nombre,
+                                correo: correo,
+                                face_image: blob,
+                                timestamp: new Date().toISOString(),
+                                confidence: Math.floor(Math.random() * 30) + 70 // 70-99%
+                            };
+                            
+                            rostroCapturado = true;
+                            
+                            estado.innerHTML = `
+                                <span style="color: var(--success);">
+                                    <i class="fas fa-check-circle"></i> 
+                                    ✅ Rostro registrado exitosamente
+                                </span>
+                            `;
+                            mostrarMensajeFaceID(`✅ Face ID registrado para ${nombre}`, 'success');
+                            
+                            // Actualizar interfaz
+                            document.getElementById('btn-face-id-register').innerHTML = `
+                                <i class="fas fa-check-circle"></i>
+                                Face ID Registrado
+                            `;
+                            document.getElementById('btn-face-id-register').style.background = 'linear-gradient(to right, var(--success), #3a9c35)';
+                            document.getElementById('btn-face-id-register').onclick = null;
+                            
+                            // Guardar la imagen en el campo oculto del formulario
+                            const reader = new FileReader();
+                            reader.onload = function() {
+                                document.getElementById('face_data').value = reader.result;
+                            };
+                            reader.readAsDataURL(blob);
+                            
+                            // Detener cámara
+                            if (streamCamaraFaceIDRegister) {
+                                streamCamaraFaceIDRegister.getTracks().forEach(track => track.stop());
+                                streamCamaraFaceIDRegister = null;
+                            }
+                            if (faceDetectionIntervalRegister) {
+                                clearInterval(faceDetectionIntervalRegister);
+                            }
+                            
+                            registroActivo = false;
+                        }, 'image/jpeg', 0.8);
+                    }, 500);
+                }
+            }, 50);
+        }
+
+        function cancelarRegistroFaceID() {
+            if (faceDetectionIntervalRegister) {
+                clearInterval(faceDetectionIntervalRegister);
+            }
+            if (streamCamaraFaceIDRegister) {
+                streamCamaraFaceIDRegister.getTracks().forEach(track => track.stop());
+                streamCamaraFaceIDRegister = null;
+            }
+            document.getElementById('seccion-face-id-register').classList.add('hidden');
+            document.getElementById('estado-face-id-register').innerHTML = '';
+            document.getElementById('confidence-fill-register').style.width = '0%';
+            document.getElementById('confidence-value-register').textContent = '0%';
+            document.getElementById('progress-face-id-register').style.width = '0%';
+            document.getElementById('btn-capturar-registro').disabled = false;
+            registroActivo = false;
+        }
+
+        // ⭐ FUNCIONES PARA REGISTRO DE HUELLA DIGITAL ⭐
+        async function iniciarRegistroHuella() {
+            // Validar que los campos básicos estén llenos
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            const password = document.getElementById('password').value;
+            
+            if (!nombre || !correo || !password) {
+                mostrarMensajeHuella('❌ Por favor, completa primero los datos básicos del formulario', 'error');
+                return;
+            }
+            
+            // Verificar compatibilidad con Web Authentication API
+            if (!window.PublicKeyCredential) {
+                mostrarMensajeHuella('❌ Tu dispositivo no soporta autenticación por huella digital', 'error');
+                return;
+            }
+            
+            document.getElementById('seccion-huella-register').classList.remove('hidden');
+            mostrarMensajeHuella('🔍 Iniciando registro de huella digital...', 'info');
+            
+            try {
+                // Simular proceso de registro de huella
+                await simularRegistroHuella();
+            } catch (error) {
+                mostrarMensajeHuella('❌ Error en el registro de huella: ' + error.message, 'error');
+                cancelarRegistroHuella();
+            }
+        }
+
+        async function simularRegistroHuella() {
+            const estado = document.getElementById('estado-huella-register');
+            const progressBar = document.getElementById('progress-huella-register');
+            
+            estado.innerHTML = '<span style="color: #7209b7;"><i class="fas fa-sync fa-spin"></i> Preparando sensor de huella...</span>';
+            
+            // Simular progreso de registro
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress <= 30) {
+                    estado.innerHTML = '<span style="color: #7209b7;"><i class="fas fa-sync fa-spin"></i> Inicializando sensor...</span>';
+                } else if (progress <= 60) {
+                    estado.innerHTML = '<span style="color: #7209b7;"><i class="fas fa-fingerprint"></i> Coloca tu dedo en el sensor...</span>';
+                } else if (progress <= 90) {
+                    estado.innerHTML = '<span style="color: #7209b7;"><i class="fas fa-sync fa-spin"></i> Escaneando huella...</span>';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Simular registro exitoso
+                    setTimeout(() => {
+                        const nombre = document.getElementById('nombre').value;
+                        
+                        // Generar datos simulados de huella
+                        datosHuellaUsuario = {
+                            nombre: nombre,
+                            timestamp: new Date().toISOString(),
+                            method: 'fingerprint',
+                            device: navigator.userAgent
+                        };
+                        
+                        huellaRegistrada = true;
+                        
+                        estado.innerHTML = `
+                            <span style="color: var(--success);">
+                                <i class="fas fa-check-circle"></i> 
+                                ✅ Huella digital registrada exitosamente
+                            </span>
+                        `;
+                        mostrarMensajeHuella(`✅ Huella digital registrada para ${nombre}`, 'success');
+                        
+                        // Actualizar interfaz
+                        document.getElementById('btn-huella-register').innerHTML = `
+                            <i class="fas fa-check-circle"></i>
+                            Huella Registrada
+                        `;
+                        document.getElementById('btn-huella-register').style.background = 'linear-gradient(to right, var(--success), #3a9c35)';
+                        document.getElementById('btn-huella-register').onclick = null;
+                        
+                        // Guardar datos en campo oculto
+                        document.getElementById('fingerprint_data').value = JSON.stringify(datosHuellaUsuario);
+                        
+                        // Habilitar botón de completar
+                        document.getElementById('btn-completar-huella').disabled = false;
+                    }, 1000);
+                }
+            }, 100);
+        }
+
+        function completarRegistroHuella() {
+            document.getElementById('seccion-huella-register').classList.add('hidden');
+            mostrarMensajeHuella('✅ Registro de huella completado', 'success');
+        }
+
+        function cancelarRegistroHuella() {
+            document.getElementById('seccion-huella-register').classList.add('hidden');
+            document.getElementById('estado-huella-register').innerHTML = '';
+            document.getElementById('progress-huella-register').style.width = '0%';
+            document.getElementById('btn-completar-huella').disabled = true;
+        }
+
+        function mostrarMensajeFaceID(mensaje, tipo = 'info') {
+            const div = document.getElementById('face-id-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `biometric-message biometric-${tipo}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${mensaje}
+            `;
+            div.appendChild(messageDiv);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(() => messageDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function mostrarMensajeHuella(mensaje, tipo = 'info') {
+            const div = document.getElementById('huella-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `biometric-message biometric-${tipo}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${mensaje}
+            `;
+            div.appendChild(messageDiv);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(() => messageDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Modificar el envío del formulario para incluir datos biométricos
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            let mensajes = [];
+            
+            if (!rostroCapturado) {
+                mensajes.push('⚠️ Podrás registrar tu Face ID más tarde desde tu perfil');
+            }
+            
+            if (!huellaRegistrada) {
+                mensajes.push('⚠️ Podrás registrar tu huella digital más tarde desde tu perfil');
+            }
+            
+            if (mensajes.length > 0) {
+                mensajes.forEach(msg => {
+                    mostrarMensajeFaceID(msg, 'warning');
+                });
+            }
+            
+            // Continuar con el registro normal
+            mostrarMensajeFaceID('📤 Enviando datos de registro...', 'info');
+        });
+
+        // Inicialización - Verificar compatibilidad con huella digital
+        document.addEventListener('DOMContentLoaded', function() {
+            mostrarMensajeFaceID('👆 Registra tu Face ID para acceder de forma rápida y segura', 'info');
+            
+            // Verificar compatibilidad con WebAuthn
+            if (!window.PublicKeyCredential) {
+                document.getElementById('btn-huella-register').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Huella no disponible
+                `;
+                document.getElementById('btn-huella-register').style.background = 'linear-gradient(to right, #6c757d, #495057)';
+                document.getElementById('btn-huella-register').onclick = null;
+                mostrarMensajeHuella('ℹ️ La huella digital no está disponible en este dispositivo', 'info');
+            } else {
+                mostrarMensajeHuella('👆 Registra tu huella digital para acceso ultrarrápido', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

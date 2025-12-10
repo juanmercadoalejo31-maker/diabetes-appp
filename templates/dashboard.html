@@ -1,0 +1,2908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Glucocontrol Seguro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #4bb543;
+            --warning: #ffcc00;
+            --danger: #ff3333;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gradient-primary: linear-gradient(135deg, #4361ee, #3a0ca3);
+            --gradient-success: linear-gradient(135deg, #4bb543, #2e7d32);
+            --gradient-warning: linear-gradient(135deg, #ffcc00, #ff9800);
+            --gradient-danger: linear-gradient(135deg, #ff3333, #d32f2f);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .titulo {
+            font-size: 26px;
+            font-weight: bold;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .user-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 1000;
+            margin-top: 5px;
+        }
+        
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem;
+            text-decoration: none;
+            color: var(--dark);
+            transition: background 0.3s;
+        }
+        
+        .user-dropdown a:hover {
+            background: #f8f9fa;
+        }
+        
+        .user-menu:hover .user-dropdown {
+            display: block;
+        }
+        
+        .container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 2rem 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+        
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(to right, rgba(67, 97, 238, 0.1), transparent);
+            border-left-color: var(--primary);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+        
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .welcome-card {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .card {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 1.8rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--gradient-warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        th, td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .glucose-level {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .level-normal { background: #e8f5e9; color: #2e7d32; }
+        .level-high { background: #ffebee; color: #c62828; }
+        .level-low { background: #fff3e0; color: #ef6c00; }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .alert {
+            padding: 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid;
+        }
+        
+        .alert-warning {
+            background: #fff8e1;
+            color: #ff8f00;
+            border-left-color: #ffc107;
+        }
+        
+        .alert-info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left-color: #2196f3;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #4caf50;
+        }
+        
+        .chart-container {
+            height: 350px;
+            margin: 1.5rem 0;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+        
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .tip-card {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .tip-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1.2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .emergency-contact {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.2);
+        }
+        
+        .flashes {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .flashes li {
+            padding: 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .flashes .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flashes .error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalSlide 0.3s ease;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: #f0f2f5;
+            color: #555;
+        }
+        
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .badge-warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .activity-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .report-card {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .report-stat {
+            text-align: center;
+            padding: 1.2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .report-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .glucose-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .timeline-item {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .timeline-dot.low { background: var(--warning); }
+        .timeline-dot.high { background: var(--danger); }
+        .timeline-dot.normal { background: var(--success); }
+        
+        .timeline-line {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .food-log {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .food-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .food-details {
+            flex: 1;
+        }
+        
+        .food-name {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+        
+        .food-info {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .menu-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        #welcome-username {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .user-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        @keyframes downloadPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .downloading {
+            animation: downloadPulse 1s ease infinite;
+        }
+        
+        .directory-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInFromBottom 0.3s ease;
+        }
+        
+        @keyframes slideInFromBottom {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div class="header shadow">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                Glucocontrol Seguro
+            </div>
+            
+            <div class="user-info">
+                <span id="username-display">Bienvenido, {{ usuario["nombre"] if usuario else 'Usuario' }}</span>
+                <div class="user-menu">
+                    <button class="user-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Mi Cuenta</span>
+                    </button>
+                    <div class="user-dropdown">
+                        <a href="#" onclick="showChangePasswordModal()">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </a>
+                        <a href="#" onclick="showProfileModal()">
+                            <i class="fas fa-user-edit"></i> Editar Perfil
+                        </a>
+                        <a href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Menú lateral -->
+        <div class="sidebar">
+            <div class="nav-item active" onclick="showSection('inicio')">
+                <i class="fas fa-home"></i> Inicio
+            </div>
+            <div class="nav-item" onclick="showSection('glucosa')">
+                <i class="fas fa-tint"></i> Control de Glucosa
+            </div>
+            <div class="nav-item" onclick="showSection('medicamentos')">
+                <i class="fas fa-pills"></i> Medicamentos
+            </div>
+            <div class="nav-item" onclick="showSection('alimentacion')">
+                <i class="fas fa-apple-alt"></i> Alimentación
+            </div>
+            <div class="nav-item" onclick="showSection('ejercicio')">
+                <i class="fas fa-running"></i> Ejercicio
+            </div>
+            <div class="nav-item" onclick="showSection('reportes')">
+                <i class="fas fa-chart-bar"></i> Reportes
+            </div>
+            <div class="nav-item" onclick="showSection('documentos')">
+                <i class="fas fa-file-medical"></i> Documentos
+            </div>
+            <div class="nav-item" onclick="showSection('faceid')">
+                <i class="fas fa-camera"></i> Face ID
+            </div>
+            <div class="nav-item" onclick="showSection('emergencia')">
+                <i class="fas fa-first-aid"></i> Emergencia
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Sección Inicio -->
+            <div id="inicio" class="section active">
+                <!-- Información del usuario del segundo código -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h4 class="mb-2">👤 Bienvenido/a: <strong>{{ usuario["nombre"] if usuario else 'Usuario' }}</strong></h4>
+                        <p class="mb-1"><strong>Correo:</strong> {{ usuario["correo"] if usuario else 'No disponible' }}</p>
+                        {% if datos_descifrados %}
+                        <p><strong>Datos descifrados de sesión:</strong> {{ datos_descifrados }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="welcome-card">
+                    <h1>Bienvenido, <span id="welcome-username">{{ usuario["nombre"] if usuario else 'Usuario' }}</span></h1>
+                    <p>Tu centro de control para el manejo de la diabetes</p>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <span class="badge badge-success">
+                            <i class="fas fa-check-circle"></i> Estatus: Activo
+                        </span>
+                        <button class="btn btn-primary" onclick="showChangePasswordModal()" 
+                                style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </button>
+                        <button class="btn btn-warning" onclick="showProfileModal()"
+                                style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">
+                            <i class="fas fa-user-edit"></i> Editar Perfil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Módulos principales del segundo código -->
+                <div class="row mb-4">
+                    <!-- Módulo medicamentos -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center">
+                                <h5>💊 Mis Medicamentos</h5>
+                                <p>Consulta dosis, descripciones y frecuencia.</p>
+                                <button class="btn btn-primary menu-btn" onclick="showSection('medicamentos')">Ver Medicamentos</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Face ID -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center">
+                                <h5>📸 Face ID</h5>
+                                <p>Verifica o registra datos biométricos.</p>
+                                <a href="/login_faceid" class="btn btn-primary menu-btn">Probar Face ID</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Archivos -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center">
+                                <h5>📤 Subir documentos</h5>
+                                <p>Carga archivos médicos, PDFs, imágenes, etc.</p>
+                                <a href="/upload" class="btn btn-primary menu-btn">Subir Archivo</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-tint fa-2x" style="color: var(--primary);"></i>
+                        <div class="stat-value" id="ultima-glucosa">125 mg/dL</div>
+                        <div class="stat-label">Última Glucosa</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-pills fa-2x" style="color: var(--success);"></i>
+                        <div class="stat-value">{{ medicamentos|length if medicamentos else 0 }}</div>
+                        <div class="stat-label">Medicamentos Activos</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="badge">0 pendientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-apple-alt fa-2x" style="color: var(--warning);"></i>
+                        <div class="stat-value" id="dias-consecutivos">7</div>
+                        <div class="stat-label">Días Consecutivos Registrados</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-heartbeat fa-2x" style="color: var(--danger);"></i>
+                        <div class="stat-value" id="meta-semanal">85%</div>
+                        <div class="stat-label">Meta Semanal Alcanzada</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-calendar-day"></i> Resumen de Hoy</h3>
+                        <span id="fecha-hoy" class="badge"></span>
+                    </div>
+                    <div id="resumen-hoy">
+                        <div class="activity-card">
+                            <div class="activity-icon">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>Glucosa Matutina: 125 mg/dL</h4>
+                                <p style="color: #666; font-size: 0.9rem;">Registrado a las 08:00 AM</p>
+                            </div>
+                            <span class="glucose-level level-normal">
+                                <i class="fas fa-check"></i> Normal
+                            </span>
+                        </div>
+                        
+                        <div class="activity-card">
+                            <div class="activity-icon" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>Desayuno Registrado</h4>
+                                <p style="color: #666; font-size: 0.9rem;">45g de carbohidratos</p>
+                            </div>
+                            <span class="badge badge-success">Completado</span>
+                        </div>
+                        
+                        <div class="activity-card">
+                            <div class="activity-icon" style="background: linear-gradient(135deg, #2196f3, #0d47a1);">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>Ejercicio Pendiente</h4>
+                                <p style="color: #666; font-size: 0.9rem;">30 minutos de caminata recomendados</p>
+                            </div>
+                            <span class="badge badge-warning">Pendiente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-lightbulb"></i> Consejos del Día</h3>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-water"></i>
+                            </div>
+                            <h4>Hidratación Inteligente</h4>
+                            <p>Bebe 2 litros de agua al día. El agua con limón en ayunas ayuda a regular los niveles.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-clock"></i> Cada 2 horas
+                            </span>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-walking"></i>
+                            </div>
+                            <h4>Actividad Física Programada</h4>
+                            <p>30 minutos después de las comidas mejora la sensibilidad a la insulina en un 40%.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-fire"></i> 150 kcal
+                            </span>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <h4>Descanso Reparador</h4>
+                            <p>7-8 horas de sueño profundo regulan el cortisol y mejoran el control glucémico.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-moon"></i> 22:00 - 06:00
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Control de Glucosa -->
+            <div id="glucosa" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-tint"></i> Registro de Glucosa</h3>
+                        <span class="badge badge-success">Último: 125 mg/dL</span>
+                    </div>
+                    <form id="form-glucosa">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-sliders-h"></i> Nivel de Glucosa (mg/dL)</label>
+                                <input type="number" class="form-control" id="nivel-glucosa" required min="50" max="500" step="1" placeholder="Ej: 125">
+                                <small style="color: #666; font-size: 0.85rem;">Rango normal: 70-130 mg/dL</small>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> Momento de la medición</label>
+                                <select class="form-control" id="momento-glucosa">
+                                    <option value="ayunas">En ayunas</option>
+                                    <option value="pre-comida">Antes de comer</option>
+                                    <option value="post-comida">Después de comer</option>
+                                    <option value="antes-dormir">Antes de dormir</option>
+                                    <option value="nocturna">Nocturna</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-sticky-note"></i> Notas adicionales</label>
+                            <textarea class="form-control" id="notas-glucosa" rows="3" placeholder="¿Cómo te sientes? ¿Algún síntoma especial?"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Guardar Registro
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="saveWithReminder()">
+                                <i class="fas fa-bell"></i> Guardar con Recordatorio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-line"></i> Historial de Glucosa</h3>
+                        <div class="export-options">
+                            <button class="btn btn-primary" onclick="exportGlucosaPDF()">
+                                <i class="fas fa-file-pdf"></i> Exportar PDF
+                            </button>
+                            <button class="btn btn-success" onclick="exportGlucosaCSV()">
+                                <i class="fas fa-file-csv"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="glucosa-chart"></canvas>
+                    </div>
+                    
+                    <div class="glucose-timeline">
+                        <div class="timeline-line"></div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot normal"></div>
+                            <div>Lun<br>120</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot high"></div>
+                            <div>Mar<br>135</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot low"></div>
+                            <div>Mié<br>110</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot high"></div>
+                            <div>Jue<br>140</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot normal"></div>
+                            <div>Vie<br>125</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot normal"></div>
+                            <div>Sáb<br>130</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot normal"></div>
+                            <div>Dom<br>118</div>
+                        </div>
+                    </div>
+                    
+                    <div id="historial-glucosa" style="margin-top: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">Registros Recientes</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Nivel</th>
+                                    <th>Momento</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Hoy</td>
+                                    <td>08:00</td>
+                                    <td>125 mg/dL</td>
+                                    <td>En ayunas</td>
+                                    <td><span class="glucose-level level-normal">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Ayer</td>
+                                    <td>20:00</td>
+                                    <td>130 mg/dL</td>
+                                    <td>Antes de dormir</td>
+                                    <td><span class="glucose-level level-normal">Normal</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Ayer</td>
+                                    <td>13:00</td>
+                                    <td>140 mg/dL</td>
+                                    <td>Post-comida</td>
+                                    <td><span class="glucose-level level-high">Alto</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Medicamentos (integrada con ambos códigos) -->
+            <div id="medicamentos" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-pills"></i> Mis Medicamentos</h3>
+                        <button class="btn btn-primary" onclick="showAddMedicationModal()">
+                            <i class="fas fa-plus"></i> Agregar Medicamento
+                        </button>
+                    </div>
+                    
+                    <!-- Tabla de medicamentos del segundo código -->
+                    <h4 class="mb-3">💊 Medicamentos Registrados</h4>
+                    
+                    {% if medicamentos %}
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Dosis</th>
+                                <th>Frecuencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in medicamentos %}
+                            <tr>
+                                <td>{{ m["nombre"] if m is mapping else m[0] }}</td>
+                                <td>{{ m["descripcion"] if m is mapping else m[1] }}</td>
+                                <td>{{ m["dosis"] if m is mapping else m[2] }}</td>
+                                <td>{{ m["frecuencia"] if m is mapping else m[3] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        No hay medicamentos registrados. Agrega tu primer medicamento para comenzar.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-bell"></i> Recordatorio de Medicamentos</h3>
+                        <button class="btn btn-primary" onclick="setMedicationReminder()">
+                            <i class="fas fa-plus"></i> Agregar Recordatorio
+                        </button>
+                    </div>
+                    <div id="recordatorio-medicamentos">
+                        <div class="activity-card">
+                            <div class="activity-icon">
+                                <i class="fas fa-pills"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>Metformina 500mg</h4>
+                                <p style="color: #666; font-size: 0.9rem;">Próxima dosis: <strong>20:00 hrs</strong></p>
+                            </div>
+                            <span class="badge badge-warning">
+                                <i class="fas fa-clock"></i> En 2 horas
+                            </span>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-bell"></i> 
+                            <strong>Notificaciones activas:</strong> Recibirás recordatorios 15 minutos antes de cada dosis.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Alimentación -->
+            <div id="alimentacion" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-apple-alt"></i> Registro de Alimentos</h3>
+                        <span class="badge badge-success">Hoy: 3 comidas</span>
+                    </div>
+                    <form id="form-alimentacion">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-utensils"></i> Tipo de Comida</label>
+                                <select class="form-control" id="tipo-comida" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="desayuno">Desayuno</option>
+                                    <option value="almuerzo">Almuerzo</option>
+                                    <option value="cena">Cena</option>
+                                    <option value="snack">Snack</option>
+                                    <option value="merienda">Merienda</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> Hora de la comida</label>
+                                <input type="time" class="form-control" id="hora-comida" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-bread-slice"></i> Carbohidratos (g)</label>
+                                <input type="number" class="form-control" id="carbohidratos" min="0" max="200" step="1" placeholder="Ej: 45">
+                                <small style="color: #666; font-size: 0.85rem;">Recomendado: 45-60g por comida</small>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-balance-scale"></i> Porciones</label>
+                                <input type="number" class="form-control" id="porciones" min="0.5" max="5" step="0.5" placeholder="Ej: 2">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-sticky-note"></i> Descripción de la comida</label>
+                            <textarea class="form-control" id="descripcion-comida" rows="2" placeholder="Describe lo que comiste..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-utensils"></i> Registrar Comida
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="showFoodSuggestions()">
+                                <i class="fas fa-lightbulb"></i> Ver Sugerencias
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-history"></i> Historial de Hoy</h3>
+                        <button class="btn btn-primary" onclick="showNutritionReport()">
+                            <i class="fas fa-chart-pie"></i> Ver Resumen Nutricional
+                        </button>
+                    </div>
+                    <div id="food-history">
+                        <div class="food-log">
+                            <div class="food-icon">
+                                <i class="fas fa-egg"></i>
+                            </div>
+                            <div class="food-details">
+                                <div class="food-name">Desayuno</div>
+                                <div class="food-info">08:00 AM • 45g carbohidratos • 2 porciones</div>
+                            </div>
+                            <span class="badge badge-success">Completado</span>
+                        </div>
+                        
+                        <div class="food-log">
+                            <div class="food-icon">
+                                <i class="fas fa-drumstick-bite"></i>
+                            </div>
+                            <div class="food-details">
+                                <div class="food-name">Almuerzo</div>
+                                <div class="food-info">13:00 PM • 50g carbohidratos • 2.5 porciones</div>
+                            </div>
+                            <span class="badge badge-success">Completado</span>
+                        </div>
+                        
+                        <div class="food-log">
+                            <div class="food-icon">
+                                <i class="fas fa-apple-alt"></i>
+                            </div>
+                            <div class="food-details">
+                                <div class="food-name">Snack</div>
+                                <div class="food-info">16:30 PM • 15g carbohidratos • 1 porción</div>
+                            </div>
+                            <span class="badge badge-success">Completado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-lightbulb"></i> Consejos de Alimentación Inteligente</h3>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-carrot"></i>
+                            </div>
+                            <h4>Vegetales sin Límite</h4>
+                            <p>Los vegetales sin almidón (espinaca, brócoli, pimientos) no aumentan la glucosa.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-infinity"></i> Ilimitados
+                            </span>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-fish"></i>
+                            </div>
+                            <h4>Proteínas Magras</h4>
+                            <p>Salmón, pollo y legumbres mejoran la saciedad y control glucémico.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-weight"></i> 150g por comida
+                            </span>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <h4>Fibra Soluble</h4>
+                            <p>Avena, manzana y linaza reducen la absorción de glucosa en 30%.</p>
+                            <span class="badge" style="margin-top: 0.8rem;">
+                                <i class="fas fa-chart-line"></i> 30g diarios
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Ejercicio -->
+            <div id="ejercicio" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-running"></i> Registro de Actividad Física</h3>
+                        <span class="badge badge-success">Meta: 150 min/semana</span>
+                    </div>
+                    <form id="form-ejercicio">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-dumbbell"></i> Tipo de Ejercicio</label>
+                                <select class="form-control" id="tipo-ejercicio">
+                                    <option value="caminata">Caminata</option>
+                                    <option value="correr">Correr</option>
+                                    <option value="natacion">Natación</option>
+                                    <option value="ciclismo">Ciclismo</option>
+                                    <option value="yoga">Yoga</option>
+                                    <option value="pesas">Pesas</option>
+                                    <option value="baile">Baile</option>
+                                    <option value="eliptica">Elíptica</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-clock"></i> Duración (minutos)</label>
+                                <input type="number" class="form-control" id="duracion-ejercicio" required min="5" max="180" step="5">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fas fa-fire"></i> Intensidad</label>
+                                <select class="form-control" id="intensidad-ejercicio">
+                                    <option value="leve">Leve (puedo hablar fácilmente)</option>
+                                    <option value="moderado">Moderado (puedo hablar con dificultad)</option>
+                                    <option value="intenso">Intenso (no puedo hablar)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-heartbeat"></i> Frecuencia Cardíaca</label>
+                                <input type="number" class="form-control" id="frecuencia-cardíaca" placeholder="Ej: 120">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-sticky-note"></i> Notas</label>
+                            <textarea class="form-control" id="notas-ejercicio" rows="2" placeholder="¿Cómo te sentiste durante el ejercicio?"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-running"></i> Registrar Ejercicio
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="showExercisePlan()">
+                                <i class="fas fa-calendar-alt"></i> Ver Plan Semanal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-trophy"></i> Progreso Semanal</h3>
+                        <span class="badge badge-success">85% completado</span>
+                    </div>
+                    <div class="progress-bar" style="height: 15px;">
+                        <div class="progress-fill" style="width: 85%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #666;">
+                        <span>0 min</span>
+                        <span>150 min</span>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">Actividades de la Semana</h4>
+                        <div class="food-log">
+                            <div class="food-icon" style="background: linear-gradient(135deg, #2196f3, #0d47a1);">
+                                <i class="fas fa-walking"></i>
+                            </div>
+                            <div class="food-details">
+                                <div class="food-name">Caminata Rápida</div>
+                                <div class="food-info">Lunes • 30 min • Moderado</div>
+                            </div>
+                            <span class="badge badge-success">+150 kcal</span>
+                        </div>
+                        
+                        <div class="food-log">
+                            <div class="food-icon" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+                                <i class="fas fa-swimmer"></i>
+                            </div>
+                            <div class="food-details">
+                                <div class="food-name">Natación</div>
+                                <div class="food-info">Miércoles • 45 min • Intenso</div>
+                            </div>
+                            <span class="badge badge-success">+300 kcal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> Beneficios del Ejercicio para la Diabetes</h3>
+                    <div class="alert alert-info">
+                        <i class="fas fa-heartbeat"></i>
+                        <strong>¡El ejercicio es tu mejor medicina!</strong> Reduce la glucosa en sangre de 4 a 72 horas.
+                    </div>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <h4><i class="fas fa-arrow-down"></i> Reduce Glucosa</h4>
+                            <p>Mejora la sensibilidad a la insulina en un 30-50%</p>
+                        </div>
+                        <div class="tip-card">
+                            <h4><i class="fas fa-heart"></i> Corazón Sano</h4>
+                            <p>Disminuye el riesgo cardiovascular en un 40%</p>
+                        </div>
+                        <div class="tip-card">
+                            <h4><i class="fas fa-weight"></i> Control de Peso</h4>
+                            <p>Quema grasa abdominal, clave en diabetes tipo 2</p>
+                        </div>
+                        <div class="tip-card">
+                            <h4><i class="fas fa-brain"></i> Menos Estrés</h4>
+                            <p>Reduce el cortisol, hormona que aumenta glucosa</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Reportes -->
+            <div id="reportes" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Reportes Semanales</h3>
+                        <div class="export-options">
+                            <button class="btn btn-danger" onclick="generateCompletePDF()">
+                                <i class="fas fa-file-pdf"></i> Generar PDF Completo
+                            </button>
+                            <button class="btn btn-primary" onclick="showCustomReportModal()">
+                                <i class="fas fa-cog"></i> Reporte Personalizado
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-stats">
+                        <div class="report-stat">
+                            <div class="report-stat-value">85%</div>
+                            <div class="report-stat-label">Meta Glucosa Alcanzada</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value">7/7</div>
+                            <div class="report-stat-label">Días con Registros</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value">28</div>
+                            <div class="report-stat-label">Mediciones Totales</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value">92%</div>
+                            <div class="report-stat-label">Cumplimiento Medicamentos</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Reportes Disponibles</h4>
+                        <div class="report-actions">
+                            <button class="btn btn-primary" onclick="generateGlucoseReportPDF()">
+                                <i class="fas fa-tint"></i> Reporte de Glucosa
+                            </button>
+                            <button class="btn btn-success" onclick="generateNutritionReportPDF()">
+                                <i class="fas fa-apple-alt"></i> Reporte Nutricional
+                            </button>
+                            <button class="btn btn-warning" onclick="generateExerciseReportPDF()">
+                                <i class="fas fa-running"></i> Reporte de Ejercicio
+                            </button>
+                            <button class="btn btn-danger" onclick="generateMedicationReportPDF()">
+                                <i class="fas fa-pills"></i> Reporte de Medicamentos
+                            </button>
+                            <button class="btn btn-primary" onclick="generateMedicalSummaryPDF()">
+                                <i class="fas fa-file-medical-alt"></i> Resumen Médico
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-line"></i> Análisis de Tendencias</h3>
+                        <select class="form-control" style="width: auto;" onchange="updateTrendChart(this.value)">
+                            <option value="7">Última Semana</option>
+                            <option value="30">Último Mes</option>
+                            <option value="90">Últimos 3 Meses</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trend-chart"></canvas>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <h4>Hallazgos Importantes</h4>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>¡Buenas noticias!</strong> Tu glucosa en ayunas se mantiene estable en los últimos 7 días.
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Atención:</strong> Se detectaron 2 picos post-comida mayores a 180 mg/dL. Revisa tu alimentación.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-file-medical-alt"></i> Reporte Médico Resumido</h3>
+                        <button class="btn btn-primary" onclick="generateMedicalSummaryPDF()">
+                            <i class="fas fa-download"></i> Descargar Resumen
+                        </button>
+                    </div>
+                    
+                    <div class="report-card">
+                        <h4>Resumen para tu Médico</h4>
+                        <p><strong>Período:</strong> 1-7 de Diciembre 2024</p>
+                        <p><strong>Paciente:</strong> {{ usuario["nombre"] if usuario else 'Usuario' }}</p>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h5>Estadísticas Clave:</h5>
+                            <ul style="margin-left: 1.5rem;">
+                                <li>Glucosa promedio: 128 mg/dL</li>
+                                <li>Rango normal: 85% de las mediciones</li>
+                                <li>Medicamentos tomados: 92%</li>
+                                <li>Ejercicio semanal: 180 minutos</li>
+                                <li>Peso estable: 75 kg</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <h5>Recomendaciones Automáticas:</h5>
+                            <div class="alert alert-info">
+                                1. Mantener hidratación óptima<br>
+                                2. Incrementar fibra en cenas<br>
+                                3. Revisar dosis de medicamento nocturno<br>
+                                4. Continuar con rutina de ejercicio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Documentos -->
+            <div id="documentos" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-upload"></i> Subir y Firmar Documentos</h3>
+                    <p>Gestiona tus documentos médicos de forma segura y firma digitalmente.</p>
+                    
+                    <div class="tips-grid" style="margin-top: 1.5rem;">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <h4>Subir Documentos</h4>
+                            <p>Sube recetas, resultados de laboratorio y otros documentos importantes.</p>
+                            <a href="/upload" class="btn btn-primary menu-btn">
+                                <i class="fas fa-upload"></i> Subir Documento
+                            </a>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-signature"></i>
+                            </div>
+                            <h4>Firma Digital</h4>
+                            <p>Firma documentos importantes con certificación digital.</p>
+                            <button class="btn btn-success menu-btn" onclick="showDigitalSignature()">
+                                <i class="fas fa-signature"></i> Firmar Documento
+                            </button>
+                        </div>
+                        
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <h4>Compartir Seguro</h4>
+                            <p>Comparte documentos con médicos de forma encriptada.</p>
+                            <button class="btn btn-warning menu-btn" onclick="showShareModal()">
+                                <i class="fas fa-share"></i> Compartir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-file-medical"></i> Documentos Importantes</h3>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Documentación esencial:</strong> Mantén siempre actualizados estos documentos.
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                        <div class="badge" style="padding: 0.8rem 1.2rem;">
+                            <i class="fas fa-file-prescription"></i> Recetas
+                        </div>
+                        <div class="badge" style="padding: 0.8rem 1.2rem;">
+                            <i class="fas fa-vial"></i> Laboratorios
+                        </div>
+                        <div class="badge" style="padding: 0.8rem 1.2rem;">
+                            <i class="fas fa-file-invoice-dollar"></i> Seguro Médico
+                        </div>
+                        <div class="badge" style="padding: 0.8rem 1.2rem;">
+                            <i class="fas fa-address-card"></i> Identificación
+                        </div>
+                        <div class="badge" style="padding: 0.8rem 1.2rem;">
+                            <i class="fas fa-history"></i> Historial
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <h4>Documentos Recientes</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Documento</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Hemoglobina Glicosilada</td>
+                                    <td>Laboratorio</td>
+                                    <td>01/12/2024</td>
+                                    <td><span class="badge badge-success">Firmado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Receta Metformina</td>
+                                    <td>Receta</td>
+                                    <td>15/11/2024</td>
+                                    <td><span class="badge badge-warning">Por vencer</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Autorización Seguro</td>
+                                    <td>Seguro</td>
+                                    <td>10/11/2024</td>
+                                    <td><span class="badge badge-success">Vigente</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Face ID -->
+            <div id="faceid" class="section">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="card-title mb-4"><i class="fas fa-camera"></i> Face ID - Reconocimiento Facial</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-user-check text-primary"></i> Verificación Facial</h5>
+                                        <p>Usa tu cámara para acceder de forma segura a tu cuenta.</p>
+                                        <div class="text-center my-3">
+                                            <div style="width: 200px; height: 200px; background: #f0f2f5; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-user fa-4x text-secondary"></i>
+                                            </div>
+                                        </div>
+                                        <a href="/login_faceid" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-camera"></i> Probar Face ID
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-shield-alt text-success"></i> Seguridad Biométrica</h5>
+                                        <p>Tu rostro es tu contraseña. Acceso rápido y seguro.</p>
+                                        
+                                        <div class="mt-4">
+                                            <h6><i class="fas fa-check-circle text-success"></i> Beneficios:</h6>
+                                            <ul class="text-start">
+                                                <li>Acceso instantáneo sin contraseñas</li>
+                                                <li>Máxima seguridad con reconocimiento facial</li>
+                                                <li>Protección contra accesos no autorizados</li>
+                                                <li>Fácil configuración y uso</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <button class="btn btn-outline-primary mt-3" onclick="configureFaceID()">
+                                            <i class="fas fa-cog"></i> Configurar Face ID
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> El Face ID funciona mejor con buena iluminación y tu rostro frente a la cámara.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-history"></i> Historial de Accesos</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Método</th>
+                                    <th>Estado</th>
+                                    <th>Dispositivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Hoy, 08:30</td>
+                                    <td>Face ID</td>
+                                    <td><span class="badge bg-success">Exitoso</span></td>
+                                    <td>Chrome - Windows</td>
+                                </tr>
+                                <tr>
+                                    <td>Ayer, 20:15</td>
+                                    <td>Contraseña</td>
+                                    <td><span class="badge bg-success">Exitoso</span></td>
+                                    <td>Firefox - Windows</td>
+                                </tr>
+                                <tr>
+                                    <td>05/12/2024, 14:20</td>
+                                    <td>Face ID</td>
+                                    <td><span class="badge bg-success">Exitoso</span></td>
+                                    <td>Safari - Mac</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Emergencia -->
+            <div id="emergencia" class="section">
+                <div class="emergency-contact">
+                    <h3><i class="fas fa-first-aid"></i> Contactos de Emergencia</h3>
+                    <p>En caso de emergencia, contacta inmediatamente a:</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 1.2rem; border-radius: 10px;">
+                            <h4><i class="fas fa-user-md"></i> Médico de Cabecera</h4>
+                            <p><strong>Dr. González</strong></p>
+                            <p>📞 555-1234</p>
+                            <p>🏥 Hospital Central</p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.2); padding: 1.2rem; border-radius: 10px;">
+                            <h4><i class="fas fa-ambulance"></i> Emergencias</h4>
+                            <p><strong>911</strong></p>
+                            <p>📞 911</p>
+                            <p>🚨 Atención 24/7</p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.2); padding: 1.2rem; border-radius: 10px;">
+                            <h4><i class="fas fa-user-friends"></i> Familiar Cercano</h4>
+                            <p><strong>María Rodríguez</strong></p>
+                            <p>📞 555-5678</p>
+                            <p>👨‍👩‍👧 Hija</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Síntomas de Alerta</h3>
+                        <button class="btn btn-danger" onclick="showEmergencyProtocol()">
+                            <i class="fas fa-first-aid"></i> Ver Protocolo
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong><i class="fas fa-skull-crossbones"></i> BUSCA AYUDA MÉDICA INMEDIATA SI PRESENTAS:</strong>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <div>
+                            <h4><i class="fas fa-tint" style="color: #c62828;"></i> Niveles Críticos</h4>
+                            <ul>
+                                <li>Glucosa >300 mg/dL</li>
+                                <li>Glucosa <70 mg/dL</li>
+                                <li>No responde a tratamiento</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-brain" style="color: #c62828;"></i> Síntomas Neurológicos</h4>
+                            <ul>
+                                <li>Confusión o desorientación</li>
+                                <li>Dificultad para hablar</li>
+                                <li>Pérdida de conciencia</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-lungs" style="color: #c62828;"></i> Síntomas Respiratorios</h4>
+                            <ul>
+                                <li>Respiración rápida y profunda</li>
+                                <li>Aliento con olor a frutas</li>
+                                <li>Dificultad para respirar</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-stomach" style="color: #c62828;"></i> Síntomas Digestivos</h4>
+                            <ul>
+                                <li>Náuseas y vómitos persistentes</li>
+                                <li>Dolor abdominal intenso</li>
+                                <li>Deshidratación severa</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-suitcase-medical"></i> Kit de Emergencia</h3>
+                        <button class="btn btn-primary" onclick="printEmergencyKit()">
+                            <i class="fas fa-print"></i> Imprimir Lista
+                        </button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div>
+                            <h4><i class="fas fa-vial"></i> Monitoreo</h4>
+                            <ul>
+                                <li>Glucómetro</li>
+                                <li>Tiras reactivas (20+ unidades)</li>
+                                <li>Lancetas y dispositivo</li>
+                                <li>Baterías de repuesto</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-pills"></i> Medicamentos</h4>
+                            <ul>
+                                <li>Insulina (si aplica)</li>
+                                <li>Jeringas/plumas</li>
+                                <li>Medicamentos orales</li>
+                                <li>Glucagón de emergencia</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-candy-cane"></i> Hipoglucemia</h4>
+                            <ul>
+                                <li>Tabletas de glucosa</li>
+                                <li>Jugo de frutas</li>
+                                <li>Caramelos duros</li>
+                                <li>Refresco regular</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4><i class="fas fa-id-card"></i> Documentación</h4>
+                            <ul>
+                                <li>Tarjeta de identificación médica</li>
+                                <li>Lista de contactos de emergencia</li>
+                                <li>Copias de recetas</li>
+                                <li>Datos del seguro médico</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Cambiar Contraseña</h3>
+                <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            </div>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label>Contraseña Actual</label>
+                    <input type="password" class="form-control" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Nueva Contraseña</label>
+                    <input type="password" class="form-control" id="newPassword" required minlength="8">
+                    <small style="color: #666;">Mínimo 8 caracteres, incluir números y letras</small>
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Nueva Contraseña</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Cambiar Contraseña
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal('changePasswordModal')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Perfil -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-edit"></i> Editar Perfil</h3>
+                <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+            </div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" class="form-control" id="fullName" value="{{ usuario['nombre'] if usuario else 'Usuario' }}" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="email" value="{{ usuario['correo'] if usuario else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" class="form-control" id="phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Diabetes</label>
+                    <select class="form-control" id="diabetesType">
+                        <option value="type1">Tipo 1</option>
+                        <option value="type2">Tipo 2</option>
+                        <option value="gestacional">Gestacional</option>
+                        <option value="prediabetes">Prediabetes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Diagnóstico</label>
+                    <input type="date" class="form-control" id="diagnosisDate">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal('profileModal')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Reporte Personalizado -->
+    <div id="customReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Generar Reporte Personalizado</h3>
+                <button class="modal-close" onclick="closeModal('customReportModal')">&times;</button>
+            </div>
+            <form id="customReportForm">
+                <div class="form-group">
+                    <label>Período del Reporte</label>
+                    <select class="form-control" id="reportPeriod">
+                        <option value="7">Última semana</option>
+                        <option value="30">Último mes</option>
+                        <option value="90">Últimos 3 meses</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+                <div class="form-row" id="customDates" style="display: none;">
+                    <div class="form-group">
+                        <label>Fecha Inicio</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Fin</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Secciones a Incluir</label>
+                    <div style="margin-top: 0.5rem;">
+                        <label style="display: block;">
+                            <input type="checkbox" checked> Glucosa
+                        </label>
+                        <label style="display: block;">
+                            <input type="checkbox" checked> Medicamentos
+                        </label>
+                        <label style="display: block;">
+                            <input type="checkbox" checked> Alimentación
+                        </label>
+                        <label style="display: block;">
+                            <input type="checkbox" checked> Ejercicio
+                        </label>
+                        <label style="display: block;">
+                            <input type="checkbox"> Síntomas
+                        </label>
+                        <label style="display: block;">
+                            <input type="checkbox"> Peso
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Formato de Salida</label>
+                    <select class="form-control" id="outputFormat">
+                        <option value="pdf">PDF</option>
+                        <option value="csv">CSV</option>
+                        <option value="excel">Excel</option>
+                        <option value="print">Imprimir</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-danger" onclick="generateCustomPDF(event)">
+                        <i class="fas fa-file-pdf"></i> Generar Reporte
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal('customReportModal')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar sección seleccionada
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Actualizar menú activo
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Desplazar al inicio de la sección
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        // Fecha actual
+        document.getElementById('fecha-hoy').textContent = new Date().toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Gráfico de glucosa
+        const ctx = document.getElementById('glucosa-chart').getContext('2d');
+        const glucosaChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                datasets: [{
+                    label: 'Glucosa (mg/dL)',
+                    data: [120, 135, 110, 140, 125, 130, 118],
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        if (value < 70) return '#ffcc00';
+                        if (value > 180) return '#ff3333';
+                        return '#4bb543';
+                    },
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 70,
+                        suggestedMax: 200,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' mg/dL';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de tendencias
+        const trendCtx = document.getElementById('trend-chart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 30}, (_, i) => (i + 1) + '/12'),
+                datasets: [{
+                    label: 'Glucosa Promedio Diaria',
+                    data: Array.from({length: 30}, () => Math.floor(Math.random() * (180 - 90) + 90)),
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 70,
+                        suggestedMax: 200
+                    }
+                }
+            }
+        });
+
+        // Actualizar gráfico de tendencias
+        function updateTrendChart(days) {
+            trendChart.data.labels = Array.from({length: parseInt(days)}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (parseInt(days) - i - 1));
+                return date.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit'});
+            });
+            trendChart.update();
+        }
+
+        // Manejar formularios
+        document.getElementById('form-glucosa')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nivel = parseInt(document.getElementById('nivel-glucosa').value);
+            let nivelClass = 'level-normal';
+            let icon = 'fa-check';
+            
+            if (nivel < 70) {
+                nivelClass = 'level-low';
+                icon = 'fa-exclamation-triangle';
+            } else if (nivel > 180) {
+                nivelClass = 'level-high';
+                icon = 'fa-exclamation-triangle';
+            }
+            
+            showNotification('success', `Glucosa registrada: ${nivel} mg/dL`);
+            this.reset();
+            
+            // Actualizar último valor
+            document.getElementById('ultima-glucosa').textContent = nivel + ' mg/dL';
+            
+            // Agregar al historial
+            const historial = document.getElementById('historial-glucosa').querySelector('tbody');
+            const now = new Date();
+            const newRow = `
+                <tr>
+                    <td>${now.toLocaleDateString('es-ES')}</td>
+                    <td>${now.toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'})}</td>
+                    <td>${nivel} mg/dL</td>
+                    <td>${document.getElementById('momento-glucosa').value}</td>
+                    <td><span class="glucose-level ${nivelClass}"><i class="fas ${icon}"></i> ${nivelClass.replace('level-', '')}</span></td>
+                </tr>
+            `;
+            historial.insertAdjacentHTML('afterbegin', newRow);
+        });
+
+        document.getElementById('form-alimentacion')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('tipo-comida').value;
+            const hora = document.getElementById('hora-comida').value;
+            const carbs = document.getElementById('carbohidratos').value;
+            
+            showNotification('success', `${tipo.charAt(0).toUpperCase() + tipo.slice(1)} registrado correctamente`);
+            
+            // Agregar al historial
+            const history = document.getElementById('food-history');
+            const foodLog = `
+                <div class="food-log">
+                    <div class="food-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="food-details">
+                        <div class="food-name">${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</div>
+                        <div class="food-info">${hora} • ${carbs}g carbohidratos • ${document.getElementById('porciones').value} porciones</div>
+                    </div>
+                    <span class="badge badge-success">Completado</span>
+                </div>
+            `;
+            history.insertAdjacentHTML('afterbegin', foodLog);
+            this.reset();
+        });
+
+        document.getElementById('form-ejercicio')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('tipo-ejercicio').value;
+            const duracion = document.getElementById('duracion-ejercicio').value;
+            
+            showNotification('success', `Ejercicio registrado: ${duracion} minutos de ${tipo}`);
+            
+            // Actualizar progreso
+            const progress = document.querySelector('.progress-fill');
+            const currentWidth = parseInt(progress.style.width);
+            const increment = (parseInt(duracion) / 150) * 100;
+            progress.style.width = Math.min(currentWidth + increment, 100) + '%';
+            
+            this.reset();
+        });
+
+        // Modales
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        function showProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function showCustomReportModal() {
+            document.getElementById('customReportModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Función para cambiar contraseña
+        document.getElementById('passwordForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validaciones
+            if (newPassword !== confirmPassword) {
+                showNotification('error', 'Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showNotification('error', 'La contraseña debe tener al menos 8 caracteres');
+                return;
+            }
+            
+            // Validar fortaleza de contraseña
+            const hasNumber = /\d/.test(newPassword);
+            const hasLetter = /[a-zA-Z]/.test(newPassword);
+            
+            if (!hasNumber || !hasLetter) {
+                showNotification('error', 'La contraseña debe contener letras y números');
+                return;
+            }
+            
+            showNotification('info', 'Procesando cambio de contraseña...');
+            
+            setTimeout(() => {
+                showNotification('success', '¡Contraseña cambiada exitosamente!');
+                closeModal('changePasswordModal');
+                this.reset();
+                
+                setTimeout(() => {
+                    alert('Contraseña actualizada correctamente. Por favor, vuelve a iniciar sesión para aplicar los cambios.');
+                }, 500);
+                
+            }, 1500);
+        });
+
+        // Mostrar fechas personalizadas
+        document.getElementById('reportPeriod')?.addEventListener('change', function() {
+            const customDates = document.getElementById('customDates');
+            customDates.style.display = this.value === 'custom' ? 'grid' : 'none';
+        });
+
+        // Función para mostrar notificación de directorio
+        function showDirectoryNotification() {
+            const existingNotifs = document.querySelectorAll('.directory-notification');
+            existingNotifs.forEach(notif => notif.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = 'directory-notification';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>✓ Reporte guardado en el directorio del sistema</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Función base para generar PDF
+        function generateBasePDF(title, contentCallback) {
+            showNotification('info', `Generando ${title}...`);
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Encabezado
+            doc.setFillColor(67, 97, 238);
+            doc.rect(0, 0, 210, 30, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text(title, 20, 20);
+            
+            // Información básica
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            const userName = document.getElementById('welcome-username').textContent;
+            doc.text(`Paciente: ${userName}`, 20, 45);
+            doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 20, 52);
+            
+            // Contenido específico
+            if (contentCallback) {
+                contentCallback(doc);
+            }
+            
+            // Guardar
+            const fileName = `${title.toLowerCase().replace(/\s+/g, '_')}_${userName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            showNotification('success', `${title} generado exitosamente!`);
+            showDirectoryNotification();
+        }
+
+        // 1. Reporte de Glucosa
+        function generateGlucoseReportPDF() {
+            generateBasePDF('Reporte de Glucosa', function(doc) {
+                doc.setFontSize(16);
+                doc.text('Historial de Glucosa', 20, 70);
+                
+                const data = [
+                    ['Fecha', 'Hora', 'Nivel (mg/dL)', 'Momento', 'Estado'],
+                    ['Hoy', '08:00', '125', 'En ayunas', 'Normal'],
+                    ['Ayer', '20:00', '130', 'Antes de dormir', 'Normal'],
+                    ['Ayer', '13:00', '140', 'Post-comida', 'Alto']
+                ];
+                
+                doc.autoTable({
+                    startY: 80,
+                    head: [data[0]],
+                    body: data.slice(1),
+                    theme: 'striped',
+                    headStyles: { fillColor: [67, 97, 238], textColor: [255, 255, 255] }
+                });
+                
+                // Estadísticas
+                const finalY = doc.lastAutoTable.finalY + 15;
+                doc.setFontSize(14);
+                doc.text('Estadísticas:', 20, finalY);
+                
+                doc.setFontSize(11);
+                const stats = [
+                    '• Promedio glucosa: 128 mg/dL',
+                    '• Rango normal: 85% de las mediciones',
+                    '• Variación diaria: ±15 mg/dL',
+                    '• Picos detectados: 2 (>180 mg/dL)'
+                ];
+                
+                stats.forEach((stat, index) => {
+                    doc.text(stat, 25, finalY + 10 + (index * 7));
+                });
+            });
+        }
+
+        // 2. Reporte Nutricional
+        function generateNutritionReportPDF() {
+            generateBasePDF('Reporte Nutricional', function(doc) {
+                doc.setFontSize(16);
+                doc.text('Resumen Nutricional Semanal', 20, 70);
+                
+                const data = [
+                    ['Día', 'Comidas', 'Carbohidratos (g)', 'Calorías'],
+                    ['Lunes', '3', '150', '1800'],
+                    ['Martes', '3', '145', '1750'],
+                    ['Miércoles', '4', '160', '1900'],
+                    ['Jueves', '3', '140', '1700'],
+                    ['Viernes', '4', '165', '1950']
+                ];
+                
+                doc.autoTable({
+                    startY: 80,
+                    head: [data[0]],
+                    body: data.slice(1),
+                    theme: 'striped',
+                    headStyles: { fillColor: [76, 175, 80], textColor: [255, 255, 255] }
+                });
+                
+                // Recomendaciones
+                const finalY = doc.lastAutoTable.finalY + 15;
+                doc.setFontSize(14);
+                doc.text('Recomendaciones:', 20, finalY);
+                
+                doc.setFontSize(11);
+                const recs = [
+                    '• Incrementar consumo de vegetales verdes',
+                    '• Reducir carbohidratos simples en cena',
+                    '• Mantener hidratación adecuada',
+                    '• Consumir fibra en cada comida'
+                ];
+                
+                recs.forEach((rec, index) => {
+                    doc.text(rec, 25, finalY + 10 + (index * 7));
+                });
+            });
+        }
+
+        // 3. Reporte de Ejercicio
+        function generateExerciseReportPDF() {
+            generateBasePDF('Reporte de Ejercicio', function(doc) {
+                doc.setFontSize(16);
+                doc.text('Actividad Física Semanal', 20, 70);
+                
+                const data = [
+                    ['Día', 'Actividad', 'Duración (min)', 'Intensidad', 'Calorías'],
+                    ['Lunes', 'Caminata', '30', 'Moderada', '150'],
+                    ['Martes', 'Natación', '45', 'Alta', '300'],
+                    ['Miércoles', 'Yoga', '30', 'Leve', '120'],
+                    ['Jueves', 'Ciclismo', '60', 'Alta', '400'],
+                    ['Viernes', 'Pesas', '30', 'Moderada', '180']
+                ];
+                
+                doc.autoTable({
+                    startY: 80,
+                    head: [data[0]],
+                    body: data.slice(1),
+                    theme: 'striped',
+                    headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] }
+                });
+                
+                // Progreso
+                const finalY = doc.lastAutoTable.finalY + 15;
+                doc.setFontSize(14);
+                doc.text('Progreso Semanal:', 20, finalY);
+                
+                doc.setFontSize(11);
+                const progress = [
+                    '• Total minutos: 195 min',
+                    '• Meta alcanzada: 85%',
+                    '• Calorías quemadas: 1150 kcal',
+                    '• Mejor día: Jueves (60 min)'
+                ];
+                
+                progress.forEach((item, index) => {
+                    doc.text(item, 25, finalY + 10 + (index * 7));
+                });
+            });
+        }
+
+        // 4. Reporte de Medicamentos
+        function generateMedicationReportPDF() {
+            generateBasePDF('Reporte de Medicamentos', function(doc) {
+                doc.setFontSize(16);
+                doc.text('Registro de Medicamentos', 20, 70);
+                
+                const data = [
+                    ['Medicamento', 'Dosis', 'Frecuencia', 'Cumplimiento'],
+                    ['Metformina', '500mg', '2x día', '95%'],
+                    ['Insulina', '10 unidades', '1x día', '90%'],
+                    ['Aspirina', '100mg', '1x día', '85%'],
+                    ['Vitaminas', '1 tableta', '1x día', '100%']
+                ];
+                
+                doc.autoTable({
+                    startY: 80,
+                    head: [data[0]],
+                    body: data.slice(1),
+                    theme: 'striped',
+                    headStyles: { fillColor: [244, 67, 54], textColor: [255, 255, 255] }
+                });
+                
+                // Análisis
+                const finalY = doc.lastAutoTable.finalY + 15;
+                doc.setFontSize(14);
+                doc.text('Análisis de Cumplimiento:', 20, finalY);
+                
+                doc.setFontSize(11);
+                const analysis = [
+                    '• Cumplimiento promedio: 92.5%',
+                    '• Medicamento más cumplido: Vitaminas (100%)',
+                    '• Horarios mejor cumplidos: Mañana',
+                    '• Necesita atención: Aspirina (85%)'
+                ];
+                
+                analysis.forEach((item, index) => {
+                    doc.text(item, 25, finalY + 10 + (index * 7));
+                });
+            });
+        }
+
+        // 5. Resumen Médico Completo
+        function generateMedicalSummaryPDF() {
+            generateBasePDF('Resumen Médico Completo', function(doc) {
+                doc.setFontSize(16);
+                doc.text('Resumen Clínico', 20, 70);
+                
+                // Sección 1: Datos del Paciente
+                doc.setFontSize(14);
+                doc.text('Datos del Paciente:', 20, 85);
+                doc.setFontSize(12);
+                doc.text(`• Nombre: ${document.getElementById('welcome-username').textContent}`, 25, 95);
+                doc.text(`• Fecha de nacimiento: No especificada`, 25, 102);
+                doc.text(`• Tipo de diabetes: Tipo 2`, 25, 109);
+                doc.text(`• Fecha diagnóstico: 2023-01-15`, 25, 116);
+                
+                // Sección 2: Estadísticas
+                doc.setFontSize(14);
+                doc.text('Estadísticas Clave:', 20, 130);
+                doc.setFontSize(12);
+                const stats = [
+                    'Glucosa promedio: 128 mg/dL',
+                    'HbA1c estimada: 6.2%',
+                    'Peso actual: 75 kg',
+                    'IMC: 24.5 (Normal)',
+                    'Presión arterial: 120/80 mmHg'
+                ];
+                
+                stats.forEach((stat, index) => {
+                    doc.text(`• ${stat}`, 25, 140 + (index * 7));
+                });
+                
+                // Sección 3: Tratamiento Actual
+                doc.setFontSize(14);
+                doc.text('Tratamiento Actual:', 20, 180);
+                doc.setFontSize(12);
+                const treatments = [
+                    'Metformina 500mg - 2x día',
+                    'Insulina glargina - 10 unidades nocturnas',
+                    'Aspirina 100mg - 1x día',
+                    'Control nutricional - Dieta diabética',
+                    'Ejercicio - 150 min/semana'
+                ];
+                
+                treatments.forEach((treatment, index) => {
+                    doc.text(`• ${treatment}`, 25, 190 + (index * 7));
+                });
+                
+                // Sección 4: Recomendaciones
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Recomendaciones Médicas', 20, 30);
+                doc.setFontSize(12);
+                const recommendations = [
+                    '1. Continuar con monitoreo glucémico diario',
+                    '2. Mantener rutina de ejercicio establecida',
+                    '3. Seguir plan de alimentación recomendado',
+                    '4. Revisar dosis de medicamentos en próxima consulta',
+                    '5. Programar próximo control: 3 meses',
+                    '6. Realizar examen de hemoglobina glicosilada',
+                    '7. Control de presión arterial semanal',
+                    '8. Revisión podológica trimestral'
+                ];
+                
+                recommendations.forEach((rec, index) => {
+                    doc.text(rec, 20, 45 + (index * 8));
+                });
+                
+                // Firma
+                doc.text('_________________________________', 120, 180);
+                doc.text('Glucocontrol Seguro', 120, 187);
+                doc.text('Sistema de Gestión de Diabetes', 120, 194);
+            });
+        }
+
+        // 6. Reporte Completo (Todos los datos)
+        function generateCompletePDF() {
+            generateBasePDF('Reporte Completo de Diabetes', function(doc) {
+                let yPos = 70;
+                
+                // Glucosa
+                doc.setFontSize(14);
+                doc.text('1. Control de Glucosa', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                doc.text('• Promedio semanal: 128 mg/dL', 25, yPos);
+                yPos += 7;
+                doc.text('• Rango normal: 85% de mediciones', 25, yPos);
+                yPos += 7;
+                doc.text('• Picos glucémicos: 2 registros >180 mg/dL', 25, yPos);
+                yPos += 15;
+                
+                // Medicamentos
+                doc.setFontSize(14);
+                doc.text('2. Medicamentos', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                doc.text('• Cumplimiento promedio: 92%', 25, yPos);
+                yPos += 7;
+                doc.text('• Medicamentos activos: 3', 25, yPos);
+                yPos += 7;
+                doc.text('• Recordatorios configurados: 4', 25, yPos);
+                yPos += 15;
+                
+                // Nutrición
+                doc.setFontSize(14);
+                doc.text('3. Nutrición', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                doc.text('• Comidas registradas: 21/21', 25, yPos);
+                yPos += 7;
+                doc.text('• Carbohidratos promedio: 45g/comida', 25, yPos);
+                yPos += 7;
+                doc.text('• Consumo de fibra: Adecuado', 25, yPos);
+                yPos += 15;
+                
+                // Ejercicio
+                doc.setFontSize(14);
+                doc.text('4. Ejercicio', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                doc.text('• Minutos semanales: 195 min', 25, yPos);
+                yPos += 7;
+                doc.text('• Meta alcanzada: 85%', 25, yPos);
+                yPos += 7;
+                doc.text('• Calorías quemadas: 1150 kcal', 25, yPos);
+                yPos += 15;
+                
+                // Página 2 para más detalles
+                doc.addPage();
+                yPos = 30;
+                
+                doc.setFontSize(16);
+                doc.text('Análisis Detallado y Recomendaciones', 20, yPos);
+                yPos += 20;
+                
+                doc.setFontSize(14);
+                doc.text('Hallazgos Importantes:', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                
+                const findings = [
+                    '✓ Control glucémico estable en ayunas',
+                    '⚠ Atención a picos postprandiales',
+                    '✓ Excelente cumplimiento de medicación',
+                    '✓ Rutina de ejercicio constante',
+                    '✓ Registro nutricional completo',
+                    '⚠ Revisar consumo de carbohidratos en cena',
+                    '✓ Hidratación adecuada mantenida'
+                ];
+                
+                findings.forEach((finding, index) => {
+                    doc.text(finding, 25, yPos + (index * 8));
+                });
+                
+                yPos += (findings.length * 8) + 15;
+                
+                doc.setFontSize(14);
+                doc.text('Plan de Acción:', 20, yPos);
+                doc.setFontSize(12);
+                yPos += 10;
+                
+                const actionPlan = [
+                    '1. Monitorear glucosa 1 hora post-comida',
+                    '2. Incrementar fibra en cenas',
+                    '3. Mantener rutina de ejercicio actual',
+                    '4. Revisar dosis de insulina nocturna',
+                    '5. Próximo control médico: 1 mes',
+                    '6. Realizar examen de HbA1c',
+                    '7. Continuar registro diario'
+                ];
+                
+                actionPlan.forEach((action, index) => {
+                    doc.text(action, 25, yPos + (index * 8));
+                });
+            });
+        }
+
+        // 7. Reporte Personalizado
+        function generateCustomPDF(event) {
+            event.preventDefault();
+            const period = document.getElementById('reportPeriod').value;
+            const format = document.getElementById('outputFormat').value;
+            
+            if (format === 'pdf') {
+                generateCompletePDF();
+            } else {
+                showNotification('info', `Generando reporte personalizado en formato ${format.toUpperCase()}...`);
+                setTimeout(() => {
+                    showNotification('success', 'Reporte personalizado generado!');
+                    showDirectoryNotification();
+                }, 1500);
+            }
+            
+            closeModal('customReportModal');
+        }
+
+        // Funciones para compatibilidad
+        function exportGlucosaPDF() {
+            generateGlucoseReportPDF();
+        }
+
+        function exportGlucosaCSV() {
+            showNotification('info', 'Descargando CSV de glucosa...');
+            setTimeout(() => {
+                showNotification('success', 'CSV de glucosa generado!');
+                showDirectoryNotification();
+            }, 1500);
+        }
+
+        // Funciones adicionales
+        function configureFaceID() {
+            showNotification('info', 'Configurando Face ID...');
+        }
+
+        function showDigitalSignature() {
+            showNotification('info', 'Mostrando herramienta de firma digital...');
+        }
+
+        function showShareModal() {
+            showNotification('info', 'Mostrando opciones de compartir...');
+        }
+
+        function showEmergencyProtocol() {
+            showNotification('info', 'Mostrando protocolo de emergencia...');
+        }
+
+        function printEmergencyKit() {
+            window.print();
+        }
+
+        function saveWithReminder() {
+            showNotification('info', 'Registro guardado con recordatorio configurado');
+        }
+
+        function showFoodSuggestions() {
+            showNotification('info', 'Mostrando sugerencias de alimentos...');
+        }
+
+        function showNutritionReport() {
+            showNotification('info', 'Mostrando resumen nutricional...');
+        }
+
+        function showExercisePlan() {
+            showNotification('info', 'Mostrando plan de ejercicio semanal...');
+        }
+
+        function setMedicationReminder() {
+            showNotification('info', 'Configurando recordatorio de medicamentos...');
+        }
+
+        function showAddMedicationModal() {
+            showNotification('info', 'Agregando nuevo medicamento...');
+        }
+
+        // Función para mostrar notificaciones
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            notification.style.animation = 'slideIn 0.3s ease';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar fecha mínima para inputs de fecha
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.max = today;
+            });
+            
+            // Configurar hora actual por defecto
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0');
+            const horaComida = document.getElementById('hora-comida');
+            if (horaComida) horaComida.value = timeString;
+        });
+    </script>
+</body>
+</html>
